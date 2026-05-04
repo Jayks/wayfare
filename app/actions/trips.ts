@@ -1,0 +1,135 @@
+"use server";
+
+import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db/client";
+import { trips } from "@/lib/db/schema/trips";
+import { tripMembers } from "@/lib/db/schema/trip-members";
+import { createTripSchema, type CreateTripInput } from "@/lib/validations/trip";
+import { eq, and, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+
+export async function createTrip(input: CreateTripInput) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated" } as const;
+
+  const parsed = createTripSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid input" } as const;
+
+  const { name, description, coverPhotoUrl, defaultCurrency, startDate, endDate, budget } = parsed.data;
+
+  const [trip] = await db.insert(trips).values({
+    name,
+    description: description || null,
+    coverPhotoUrl: coverPhotoUrl || null,
+    defaultCurrency,
+    startDate: startDate || null,
+    endDate: endDate || null,
+    budget: budget != null ? String(budget) : null,
+    createdBy: user.id,
+  }).returning();
+
+  const displayName = (user.user_metadata?.full_name as string | undefined)
+    ?? user.email?.split("@")[0]
+    ?? null;
+
+  await db.insert(tripMembers).values({
+    tripId: trip.id,
+    userId: user.id,
+    displayName,
+    role: "admin",
+  });
+
+  revalidatePath("/trips");
+  return { ok: true, tripId: trip.id } as const;
+}
+
+export async function updateTrip(tripId: string, input: CreateTripInput) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated" } as const;
+
+  const parsed = createTripSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid input" } as const;
+
+  const [membership] = await db
+    .select()
+    .from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
+
+  if (!membership || membership.role !== "admin")
+    return { ok: false, error: "Not authorized" } as const;
+
+  const { name, description, coverPhotoUrl, defaultCurrency, startDate, endDate, budget } = parsed.data;
+
+  await db.update(trips).set({
+    name,
+    description: description || null,
+    coverPhotoUrl: coverPhotoUrl || null,
+    defaultCurrency,
+    startDate: startDate || null,
+    endDate: endDate || null,
+    budget: budget != null ? String(budget) : null,
+  }).where(eq(trips.id, tripId));
+
+  revalidatePath(`/trips/${tripId}`);
+  revalidatePath("/trips");
+  return { ok: true } as const;
+}
+
+export async function archiveTrip(tripId: string, archive: boolean) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated" } as const;
+
+  const [membership] = await db.select().from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
+  if (!membership || membership.role !== "admin")
+    return { ok: false, error: "Not authorized" } as const;
+
+  await db.update(trips).set({ isArchived: archive }).where(eq(trips.id, tripId));
+  revalidatePath("/trips");
+  revalidatePath(`/trips/${tripId}`);
+  return { ok: true } as const;
+}
+
+export async function deleteTrip(tripId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated" } as const;
+
+  const [membership] = await db
+    .select()
+    .from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
+
+  if (!membership || membership.role !== "admin")
+    return { ok: false, error: "Not authorized" } as const;
+
+  await db.delete(trips).where(eq(trips.id, tripId));
+  revalidatePath("/trips");
+  return { ok: true } as const;
+}
+
+export async function regenerateShareToken(tripId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated" } as const;
+
+  const [membership] = await db
+    .select()
+    .from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
+
+  if (!membership || membership.role !== "admin")
+    return { ok: false, error: "Not authorized" } as const;
+
+  const [updated] = await db
+    .update(trips)
+    .set({ shareToken: sql`gen_random_uuid()` })
+    .where(eq(trips.id, tripId))
+    .returning();
+
+  revalidatePath(`/trips/${tripId}/members`);
+  return { ok: true, shareToken: updated.shareToken } as const;
+}
