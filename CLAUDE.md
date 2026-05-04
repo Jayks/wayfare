@@ -639,15 +639,21 @@ pnpm seed             # seed test data (Goa trip, 10 members, 30 expenses)
 
 ## 17. Phase 11 — Deploy Checklist
 
-1. **Create production Supabase project** (separate from dev)
+**Production URL**: https://wayfare-sigma.vercel.app
+**Git repo**: https://github.com/Jayks/wayfare.git (branch: main)
+**Supabase**: currently using dev project (production project TBD)
+
+1. **Create production Supabase project** (separate from dev) — deferred
    - Apply all schema via `pnpm db:push` (point DATABASE_URL at prod DB)
    - Run `drizzle/policies.sql` in SQL Editor
    - Run the Realtime publication SQL
    - Configure Google OAuth provider with production callback URL
-2. **Vercel deployment**
-   - Import the Git repo
-   - Set all env vars from `.env.local.example` (prod values)
-   - Set `NEXT_PUBLIC_APP_URL` to production domain
+2. **Vercel deployment** ✅ Done
+   - Repo imported: `Jayks/wayfare`
+   - All env vars set (dev Supabase for now)
+   - `NEXT_PUBLIC_APP_URL` = `https://wayfare-sigma.vercel.app`
+   - Supabase redirect URL: `https://wayfare-sigma.vercel.app/auth/callback` added
+   - **DATABASE_URL must use Session Pooler** (not direct connection) — Vercel can't reach `db.[ref].supabase.co:5432` without Supabase IPv4 add-on. Use: `postgresql://postgres.[ref]:[password]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres`
 3. **Post-deploy**
    - Test invite flow end-to-end with 2+ real Google accounts
    - Verify realtime works (two browser tabs, one adds expense)
