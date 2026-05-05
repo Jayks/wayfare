@@ -3,7 +3,7 @@ import { expenses } from "@/lib/db/schema/expenses";
 import { expenseSplits } from "@/lib/db/schema/expense-splits";
 import { settlements } from "@/lib/db/schema/settlements";
 import { tripMembers } from "@/lib/db/schema/trip-members";
-import { eq, sum, and } from "drizzle-orm";
+import { eq, sum } from "drizzle-orm";
 import { optimizeSettlements } from "@/lib/settle/optimize";
 import { getMemberName } from "@/lib/utils";
 
@@ -23,53 +23,62 @@ export async function getBalances(tripId: string) {
     .from(tripMembers)
     .where(eq(tripMembers.tripId, tripId));
 
-  const rows: MemberBalanceRow[] = await Promise.all(
-    members.map(async (member) => {
-      // Total paid by this member
-      const [paid] = await db
-        .select({ total: sum(expenses.amount) })
-        .from(expenses)
-        .where(and(eq(expenses.tripId, tripId), eq(expenses.paidByMemberId, member.id)));
+  // 4 aggregated queries regardless of member count (replaces n*4 individual queries)
+  const [paidRows, owedRows, sentRows, receivedRows] = await Promise.all([
+    db
+      .select({ memberId: expenses.paidByMemberId, total: sum(expenses.amount) })
+      .from(expenses)
+      .where(eq(expenses.tripId, tripId))
+      .groupBy(expenses.paidByMemberId),
 
-      // Total owed by this member (their share of all expenses)
-      const [owed] = await db
-        .select({ total: sum(expenseSplits.shareAmount) })
-        .from(expenseSplits)
-        .innerJoin(expenses, eq(expenseSplits.expenseId, expenses.id))
-        .where(and(eq(expenses.tripId, tripId), eq(expenseSplits.memberId, member.id)));
+    db
+      .select({ memberId: expenseSplits.memberId, total: sum(expenseSplits.shareAmount) })
+      .from(expenseSplits)
+      .innerJoin(expenses, eq(expenseSplits.expenseId, expenses.id))
+      .where(eq(expenses.tripId, tripId))
+      .groupBy(expenseSplits.memberId),
 
-      // Settlements this member sent (paid off debts)
-      const [sent] = await db
-        .select({ total: sum(settlements.amount) })
-        .from(settlements)
-        .where(and(eq(settlements.tripId, tripId), eq(settlements.fromMemberId, member.id)));
+    db
+      .select({ memberId: settlements.fromMemberId, total: sum(settlements.amount) })
+      .from(settlements)
+      .where(eq(settlements.tripId, tripId))
+      .groupBy(settlements.fromMemberId),
 
-      // Settlements this member received
-      const [received] = await db
-        .select({ total: sum(settlements.amount) })
-        .from(settlements)
-        .where(and(eq(settlements.tripId, tripId), eq(settlements.toMemberId, member.id)));
+    db
+      .select({ memberId: settlements.toMemberId, total: sum(settlements.amount) })
+      .from(settlements)
+      .where(eq(settlements.tripId, tripId))
+      .groupBy(settlements.toMemberId),
+  ]);
 
-      const totalPaid        = Number(paid?.total ?? 0);
-      const totalOwed        = Number(owed?.total ?? 0);
-      const settlementsSent  = Number(sent?.total ?? 0);
-      const settlementsRecvd = Number(received?.total ?? 0);
+  const toMap = (rows: { memberId: string; total: string | null }[]) =>
+    new Map(rows.map((r) => [r.memberId, Number(r.total ?? 0)]));
 
-      // sent: you paid someone → reduces your debt → adds to net
-      // received: someone paid you → your receivable shrinks → subtracts from net
-      const net = totalPaid - totalOwed + settlementsSent - settlementsRecvd;
+  const paid     = toMap(paidRows);
+  const owed     = toMap(owedRows);
+  const sent     = toMap(sentRows);
+  const received = toMap(receivedRows);
 
-      return {
-        memberId: member.id,
-        displayName: getMemberName(member),
-        totalPaid,
-        totalOwed,
-        settlementsSent,
-        settlementsReceived: settlementsRecvd,
-        net: Math.round(net * 100) / 100,
-      };
-    })
-  );
+  const rows: MemberBalanceRow[] = members.map((member) => {
+    const totalPaid        = paid.get(member.id) ?? 0;
+    const totalOwed        = owed.get(member.id) ?? 0;
+    const settlementsSent  = sent.get(member.id) ?? 0;
+    const settlementsRecvd = received.get(member.id) ?? 0;
+
+    // sent: you paid someone → reduces your debt → adds to net
+    // received: someone paid you → your receivable shrinks → subtracts from net
+    const net = totalPaid - totalOwed + settlementsSent - settlementsRecvd;
+
+    return {
+      memberId: member.id,
+      displayName: getMemberName(member),
+      totalPaid,
+      totalOwed,
+      settlementsSent,
+      settlementsReceived: settlementsRecvd,
+      net: Math.round(net * 100) / 100,
+    };
+  });
 
   const suggestions = optimizeSettlements(rows.map((r) => ({ memberId: r.memberId, net: r.net })));
 

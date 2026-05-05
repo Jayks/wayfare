@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { CategoryIcon } from "@/components/expense/category-icon";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getMemberName } from "@/lib/utils";
 import type { TripMember } from "@/lib/db/schema/trip-members";
 import type { Expense } from "@/lib/db/schema/expenses";
 import type { ExpenseSplit } from "@/lib/db/schema/expense-splits";
@@ -18,10 +18,6 @@ interface Props {
   suggestions: Transaction[];
   currency: string;
   pastSettlementsTotal: number;
-}
-
-function memberName(members: TripMember[], id: string) {
-  return members.find((m) => m.id === id)?.guestName ?? "Member";
 }
 
 function StepBadge({ n }: { n: number }) {
@@ -41,6 +37,11 @@ export function SettlementBreakdown({
   pastSettlementsTotal,
 }: Props) {
   const [open, setOpen] = useState(false);
+
+  const nameOf = (id: string) => {
+    const m = members.find((m) => m.id === id);
+    return m ? getMemberName(m) : "Member";
+  };
 
   if (expensesWithSplits.length === 0) return null;
 
@@ -82,7 +83,7 @@ export function SettlementBreakdown({
 
                 <div className="space-y-4 max-h-80 overflow-y-auto pr-1">
                   {expensesWithSplits.map(({ expense, splits }) => {
-                    const payer = memberName(members, expense.paidByMemberId);
+                    const payer = nameOf(expense.paidByMemberId);
                     return (
                       <div key={expense.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
                         {/* Expense header */}
@@ -105,7 +106,7 @@ export function SettlementBreakdown({
                             return (
                               <div key={split.id} className="flex items-center gap-2 text-xs text-slate-500">
                                 <span className="text-slate-300">{isLast ? "└" : "├"}──</span>
-                                <span className="flex-1">{memberName(members, split.memberId)}</span>
+                                <span className="flex-1">{nameOf(split.memberId)}</span>
                                 <span className="tabular font-medium text-slate-600">
                                   {formatCurrency(Number(split.shareAmount), expense.currency)}
                                 </span>
@@ -210,7 +211,7 @@ export function SettlementBreakdown({
                         {/* From */}
                         <div className="flex-1 text-right">
                           <span className="inline-block bg-red-50 text-red-600 text-sm font-medium px-3 py-1.5 rounded-xl border border-red-100">
-                            {memberName(members, s.from)}
+                            {nameOf(s.from)}
                           </span>
                         </div>
 
@@ -228,7 +229,7 @@ export function SettlementBreakdown({
                         {/* To */}
                         <div className="flex-1 text-left">
                           <span className="inline-block bg-emerald-50 text-emerald-600 text-sm font-medium px-3 py-1.5 rounded-xl border border-emerald-100">
-                            {memberName(members, s.to)}
+                            {nameOf(s.to)}
                           </span>
                         </div>
                       </div>

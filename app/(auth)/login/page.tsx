@@ -5,14 +5,14 @@ import LoginForm from "./login-form";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; returnTo?: string }>;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) redirect("/trips");
 
-  const { error } = await searchParams;
+  const { error, returnTo } = await searchParams;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -36,10 +36,12 @@ export default async function LoginPage({
         {/* Glass card */}
         <div className="glass rounded-2xl p-8">
           <h2 className="text-lg font-semibold text-slate-800 mb-1">
-            Sign in to Wayfare
+            {returnTo?.startsWith("/join") ? "Sign in to join the trip" : "Sign in to Wayfare"}
           </h2>
           <p className="text-sm text-slate-500 mb-6">
-            Manage group expenses for your trips, squared up.
+            {returnTo?.startsWith("/join")
+              ? "You'll be taken directly to the trip invitation after signing in."
+              : "Manage group expenses for your trips, squared up."}
           </p>
 
           {error === "auth_callback_failed" && (
@@ -48,11 +50,12 @@ export default async function LoginPage({
             </p>
           )}
 
-          <LoginForm />
+          <LoginForm returnTo={returnTo} />
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-6">
-          By signing in you agree to our terms of service.
+          By signing in you agree to our{" "}
+          <a href="/terms" className="underline hover:text-slate-600">terms of service</a>.
         </p>
       </div>
     </div>

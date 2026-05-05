@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { MemberDebtBreakdown } from "@/components/settlement/member-debt-breakdown";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, getMemberName } from "@/lib/utils";
 import { MarkPaidButton } from "./mark-paid-button";
 import { SettlementBreakdown } from "@/components/settlement/settlement-breakdown";
 
@@ -32,8 +32,10 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
   const isAdmin = currentMember?.role === "admin";
   const pastSettlementsTotal = settlementHistory.reduce((sum, s) => sum + Number(s.amount), 0);
 
-  const memberName = (memberId: string) =>
-    members.find((m) => m.id === memberId)?.guestName ?? "Member";
+  const memberName = (memberId: string) => {
+    const m = members.find((m) => m.id === memberId);
+    return m ? getMemberName(m) : "Member";
+  };
 
   return (
     <div className="max-w-2xl">

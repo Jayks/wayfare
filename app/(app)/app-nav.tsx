@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { LogOut, Compass, BarChart2, MapPin } from "lucide-react";
+import { LogOut, Compass, BarChart2, MapPin, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -20,7 +20,7 @@ const NAV_LINKS = [
   { href: "/insights", label: "Insights", icon: BarChart2 },
 ];
 
-export default function AppNav({ user }: { user: User }) {
+export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -95,6 +95,15 @@ export default function AppNav({ user }: { user: User }) {
               <p className="text-xs text-slate-500 truncate">{user.email}</p>
             </div>
             <DropdownMenuSeparator className="bg-slate-100" />
+            {isAdmin && (
+              <DropdownMenuItem
+                onClick={() => router.push("/admin")}
+                className="cursor-pointer"
+              >
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                Admin
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={handleSignOut}
               className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer"

@@ -25,6 +25,14 @@ export function getMemberName(member: {
   return member.displayName ?? member.guestName ?? "Member";
 }
 
+export function extractDisplayName(user: {
+  user_metadata?: Record<string, unknown> | null;
+  email?: string | null;
+}): string | null {
+  const fullName = user.user_metadata?.full_name;
+  return typeof fullName === "string" ? fullName : user.email?.split("@")[0] ?? null;
+}
+
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat("en-IN", {

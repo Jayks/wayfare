@@ -9,14 +9,14 @@ interface Props {
   currency: string;
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label, currency }: { active?: boolean; payload?: any[]; label?: string; currency: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg space-y-1">
       <p className="font-semibold text-slate-700">{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} style={{ color: p.fill }} className="font-medium">
-          {p.name}: {formatCurrency(p.value, "INR")}
+          {p.name}: {formatCurrency(p.value, currency)}
         </p>
       ))}
     </div>
@@ -52,7 +52,7 @@ export function MemberContributions({ data, currency }: Props) {
             tickLine={false}
             width={60}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(6,182,212,0.06)" }} />
+          <Tooltip content={<CustomTooltip currency={currency} />} cursor={{ fill: "rgba(6,182,212,0.06)" }} />
           <Legend iconType="circle" iconSize={8} formatter={(v) => <span className="text-xs text-slate-600">{v}</span>} />
           <Bar dataKey="Paid"  fill="#06B6D4" radius={[0, 4, 4, 0]} barSize={10} />
           <Bar dataKey="Owed"  fill="#E2E8F0" radius={[0, 4, 4, 0]} barSize={10} />

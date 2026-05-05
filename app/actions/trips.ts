@@ -5,7 +5,9 @@ import { db } from "@/lib/db/client";
 import { trips } from "@/lib/db/schema/trips";
 import { tripMembers } from "@/lib/db/schema/trip-members";
 import { createTripSchema, type CreateTripInput } from "@/lib/validations/trip";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { getMembership } from "@/lib/db/queries/auth";
+import { extractDisplayName } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 
 export async function createTrip(input: CreateTripInput) {
@@ -29,14 +31,10 @@ export async function createTrip(input: CreateTripInput) {
     createdBy: user.id,
   }).returning();
 
-  const displayName = (user.user_metadata?.full_name as string | undefined)
-    ?? user.email?.split("@")[0]
-    ?? null;
-
   await db.insert(tripMembers).values({
     tripId: trip.id,
     userId: user.id,
-    displayName,
+    displayName: extractDisplayName(user),
     role: "admin",
   });
 
@@ -52,11 +50,7 @@ export async function updateTrip(tripId: string, input: CreateTripInput) {
   const parsed = createTripSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid input" } as const;
 
-  const [membership] = await db
-    .select()
-    .from(tripMembers)
-    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
-
+  const membership = await getMembership(tripId, user.id);
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 
@@ -82,8 +76,7 @@ export async function archiveTrip(tripId: string, archive: boolean) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authenticated" } as const;
 
-  const [membership] = await db.select().from(tripMembers)
-    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
+  const membership = await getMembership(tripId, user.id);
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 
@@ -98,11 +91,7 @@ export async function deleteTrip(tripId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authenticated" } as const;
 
-  const [membership] = await db
-    .select()
-    .from(tripMembers)
-    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
-
+  const membership = await getMembership(tripId, user.id);
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 
@@ -116,11 +105,7 @@ export async function regenerateShareToken(tripId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authenticated" } as const;
 
-  const [membership] = await db
-    .select()
-    .from(tripMembers)
-    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
-
+  const membership = await getMembership(tripId, user.id);
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 

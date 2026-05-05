@@ -4,10 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db/client";
 import { expenses } from "@/lib/db/schema/expenses";
 import { expenseSplits } from "@/lib/db/schema/expense-splits";
-import { tripMembers } from "@/lib/db/schema/trip-members";
 import { addExpenseSchema, type AddExpenseInput } from "@/lib/validations/expense";
 import { computeSplits } from "@/lib/splits/compute";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { getMembership } from "@/lib/db/queries/auth";
 import { revalidatePath } from "next/cache";
 
 export async function addExpense(input: AddExpenseInput) {
@@ -20,9 +20,7 @@ export async function addExpense(input: AddExpenseInput) {
 
   const { tripId, paidByMemberId, description, category, amount, currency, expenseDate, endDate, notes, splitMode, splits } = parsed.data;
 
-  // Verify user is a member
-  const [membership] = await db.select().from(tripMembers)
-    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
+  const membership = await getMembership(tripId, user.id);
   if (!membership) return { ok: false, error: "Not a member" } as const;
 
   const result = computeSplits(splitMode, amount, splits);
@@ -68,12 +66,10 @@ export async function updateExpense(expenseId: string, input: AddExpenseInput) {
   const [expense] = await db.select().from(expenses).where(eq(expenses.id, expenseId));
   if (!expense) return { ok: false, error: "Not found" } as const;
 
-  if (expense.createdByUserId !== user.id) {
-    const [membership] = await db.select().from(tripMembers)
-      .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
-    if (!membership || membership.role !== "admin")
-      return { ok: false, error: "Not authorized" } as const;
-  }
+  const membership = await getMembership(tripId, user.id);
+  if (!membership) return { ok: false, error: "Not a member" } as const;
+  if (expense.createdByUserId !== user.id && membership.role !== "admin")
+    return { ok: false, error: "Not authorized" } as const;
 
   const result = computeSplits(splitMode, amount, splits);
   if (!result.ok) return { ok: false, error: result.error } as const;
@@ -109,8 +105,7 @@ export async function duplicateExpense(expenseId: string) {
   const [expense] = await db.select().from(expenses).where(eq(expenses.id, expenseId));
   if (!expense) return { ok: false, error: "Not found" } as const;
 
-  const [membership] = await db.select().from(tripMembers)
-    .where(and(eq(tripMembers.tripId, expense.tripId), eq(tripMembers.userId, user.id)));
+  const membership = await getMembership(expense.tripId, user.id);
   if (!membership) return { ok: false, error: "Not a member" } as const;
 
   const originalSplits = await db.select().from(expenseSplits)
@@ -155,12 +150,10 @@ export async function deleteExpense(expenseId: string, tripId: string) {
   const [expense] = await db.select().from(expenses).where(eq(expenses.id, expenseId));
   if (!expense) return { ok: false, error: "Not found" } as const;
 
-  if (expense.createdByUserId !== user.id) {
-    const [membership] = await db.select().from(tripMembers)
-      .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
-    if (!membership || membership.role !== "admin")
-      return { ok: false, error: "Not authorized" } as const;
-  }
+  const membership = await getMembership(tripId, user.id);
+  if (!membership) return { ok: false, error: "Not a member" } as const;
+  if (expense.createdByUserId !== user.id && membership.role !== "admin")
+    return { ok: false, error: "Not authorized" } as const;
 
   await db.delete(expenses).where(eq(expenses.id, expenseId));
   revalidatePath(`/trips/${tripId}/expenses`);

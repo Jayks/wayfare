@@ -6,6 +6,8 @@ import { trips } from "@/lib/db/schema/trips";
 import { tripMembers } from "@/lib/db/schema/trip-members";
 import { addGuestSchema } from "@/lib/validations/trip";
 import { eq, and } from "drizzle-orm";
+import { getMembership } from "@/lib/db/queries/auth";
+import { extractDisplayName } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 
 export async function addGuestMember(input: { tripId: string; guestName: string }) {
@@ -18,11 +20,7 @@ export async function addGuestMember(input: { tripId: string; guestName: string 
 
   const { tripId, guestName } = parsed.data;
 
-  const [membership] = await db
-    .select()
-    .from(tripMembers)
-    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
-
+  const membership = await getMembership(tripId, user.id);
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 
@@ -41,11 +39,7 @@ export async function removeMember(tripId: string, memberId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authenticated" } as const;
 
-  const [membership] = await db
-    .select()
-    .from(tripMembers)
-    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, user.id)));
-
+  const membership = await getMembership(tripId, user.id);
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 
@@ -69,11 +63,7 @@ export async function joinTrip(token: string) {
 
   if (existing) return { ok: true, tripId: trip.id } as const;
 
-  const displayName = (user.user_metadata?.full_name as string | undefined)
-    ?? user.email?.split("@")[0]
-    ?? null;
-
-  await db.insert(tripMembers).values({ tripId: trip.id, userId: user.id, displayName, role: "member" });
+  await db.insert(tripMembers).values({ tripId: trip.id, userId: user.id, displayName: extractDisplayName(user), role: "member" });
 
   revalidatePath("/trips");
   revalidatePath(`/trips/${trip.id}`);

@@ -30,17 +30,25 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isAppRoute = pathname.startsWith("/trips");
 
-  if (!user && isAppRoute) {
+  const isProtected =
+    pathname.startsWith("/trips") ||
+    pathname.startsWith("/join") ||
+    pathname.startsWith("/admin");
+
+  // Redirect unauthenticated users to login, preserving the destination
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    url.searchParams.set("returnTo", pathname);
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === "/login") {
+  // Redirect authenticated users away from login and landing page
+  if (user && (pathname === "/login" || pathname === "/")) {
     const url = request.nextUrl.clone();
     url.pathname = "/trips";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
