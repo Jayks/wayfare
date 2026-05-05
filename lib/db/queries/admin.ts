@@ -18,6 +18,7 @@ export function isPlatformAdmin(email: string | null | undefined): boolean {
   return getPlatformAdminEmails().includes(email);
 }
 
+/** Must only be called from admin-protected routes — no internal auth check. */
 export async function getAdminStats() {
   const [tripsResult, expensesResult, settledResult, usersResult] = await Promise.all([
     db.select({ total: count() }).from(trips),
@@ -34,6 +35,7 @@ export async function getAdminStats() {
   };
 }
 
+/** Must only be called from admin-protected routes — no internal auth check. */
 export async function getAdminUserList() {
   const { data: { users } } = await createAdminClient().auth.admin.listUsers({ perPage: 100 });
 
@@ -77,6 +79,7 @@ export async function getAdminUserList() {
   });
 }
 
+/** Must only be called from admin-protected routes — no internal auth check. */
 export async function getAdminTripList() {
   return db
     .select({

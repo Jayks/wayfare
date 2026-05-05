@@ -65,6 +65,7 @@ export async function updateExpense(expenseId: string, input: AddExpenseInput) {
 
   const [expense] = await db.select().from(expenses).where(eq(expenses.id, expenseId));
   if (!expense) return { ok: false, error: "Not found" } as const;
+  if (expense.tripId !== tripId) return { ok: false, error: "Not found" } as const;
 
   const membership = await getMembership(tripId, user.id);
   if (!membership) return { ok: false, error: "Not a member" } as const;
@@ -107,6 +108,7 @@ export async function duplicateExpense(expenseId: string) {
 
   const membership = await getMembership(expense.tripId, user.id);
   if (!membership) return { ok: false, error: "Not a member" } as const;
+  if (membership.role !== "admin") return { ok: false, error: "Not authorized" } as const;
 
   const originalSplits = await db.select().from(expenseSplits)
     .where(eq(expenseSplits.expenseId, expenseId));

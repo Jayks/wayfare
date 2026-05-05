@@ -20,6 +20,8 @@ export async function recordSettlement(input: RecordSettlementInput) {
 
   const membership = await getMembership(tripId, user.id);
   if (!membership) return { ok: false, error: "Not a member" } as const;
+  if (membership.role !== "admin") return { ok: false, error: "Not authorized" } as const;
+  if (fromMemberId === toMemberId) return { ok: false, error: "Cannot settle with yourself" } as const;
 
   await db.insert(settlements).values({
     tripId,
