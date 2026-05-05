@@ -98,9 +98,9 @@ export async function getAdminTripList() {
       endDate: trips.endDate,
       isArchived: trips.isArchived,
       createdAt: trips.createdAt,
-      memberCount: sql<number>`(select count(*) from trip_members where trip_members.trip_id = ${trips.id})`,
-      expenseCount: sql<number>`(select count(*) from expenses where expenses.trip_id = ${trips.id})`,
-      totalSpend: sql<string | null>`(select sum(amount) from expenses where expenses.trip_id = ${trips.id})`,
+      memberCount: sql<number>`(select count(*) from trip_members where trip_members.trip_id = trips.id)`,
+      expenseCount: sql<number>`(select count(*) from expenses where expenses.trip_id = trips.id)`,
+      totalSpend: sql<string | null>`(select sum(amount) from expenses where expenses.trip_id = trips.id)`,
     })
     .from(trips)
     .orderBy(desc(trips.createdAt))
