@@ -8,9 +8,14 @@ interface Props {
   data: TripSummary[];
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipEntry {
+  active?: boolean;
+  payload?: Array<{ payload: TripSummary }>;
+}
+
+function CustomTooltip({ active, payload }: TooltipEntry) {
   if (!active || !payload?.length) return null;
-  const d = payload[0].payload as TripSummary;
+  const d = payload[0].payload;
   return (
     <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold text-slate-700 mb-1">{d.name}</p>

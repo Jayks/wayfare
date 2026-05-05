@@ -9,9 +9,14 @@ interface Props {
   currency: string;
 }
 
-function CustomTooltip({ active, payload }: any) {
+interface TooltipEntry {
+  active?: boolean;
+  payload?: Array<{ payload: CategorySlice }>;
+}
+
+function CustomTooltip({ active, payload }: TooltipEntry) {
   if (!active || !payload?.length) return null;
-  const d = payload[0].payload as CategorySlice;
+  const d = payload[0].payload;
   return (
     <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg border border-white/60">
       <p className="font-semibold text-slate-700">{d.label}</p>

@@ -8,7 +8,10 @@ export const createTripSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   budget: z.number().positive().optional(),
-});
+}).refine(
+  (data) => !data.startDate || !data.endDate || data.endDate >= data.startDate,
+  { message: "End date must be on or after start date", path: ["endDate"] }
+);
 
 export type CreateTripInput = z.infer<typeof createTripSchema>;
 

@@ -5,6 +5,13 @@ import { expenses } from "@/lib/db/schema/expenses";
 import { settlements } from "@/lib/db/schema/settlements";
 import { count, sum, eq, sql, desc, isNotNull } from "drizzle-orm";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+
+async function requirePlatformAdmin(): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!isPlatformAdmin(user?.email)) throw new Error("Forbidden");
+}
 
 function getPlatformAdminEmails(): string[] {
   return (process.env.PLATFORM_ADMIN_EMAIL ?? "")
@@ -18,8 +25,8 @@ export function isPlatformAdmin(email: string | null | undefined): boolean {
   return getPlatformAdminEmails().includes(email);
 }
 
-/** Must only be called from admin-protected routes — no internal auth check. */
 export async function getAdminStats() {
+  await requirePlatformAdmin();
   const [tripsResult, expensesResult, settledResult, usersResult] = await Promise.all([
     db.select({ total: count() }).from(trips),
     db.select({ total: count() }).from(expenses),
@@ -35,8 +42,8 @@ export async function getAdminStats() {
   };
 }
 
-/** Must only be called from admin-protected routes — no internal auth check. */
 export async function getAdminUserList() {
+  await requirePlatformAdmin();
   const { data: { users } } = await createAdminClient().auth.admin.listUsers({ perPage: 100 });
 
   const [ownerCounts, memberCounts] = await Promise.all([
@@ -79,8 +86,8 @@ export async function getAdminUserList() {
   });
 }
 
-/** Must only be called from admin-protected routes — no internal auth check. */
 export async function getAdminTripList() {
+  await requirePlatformAdmin();
   return db
     .select({
       id: trips.id,
@@ -100,7 +107,7 @@ export async function getAdminTripList() {
       createdAt: trips.createdAt,
       memberCount: sql<number>`(select count(*) from trip_members where trip_members.trip_id = trips.id)`,
       expenseCount: sql<number>`(select count(*) from expenses where expenses.trip_id = trips.id)`,
-      totalSpend: sql<string | null>`(select sum(amount) from expenses where expenses.trip_id = trips.id)`,
+      totalSpend: sql<number | null>`(select sum(amount)::float8 from expenses where expenses.trip_id = trips.id)`,
     })
     .from(trips)
     .orderBy(desc(trips.createdAt))

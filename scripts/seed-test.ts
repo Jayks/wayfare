@@ -8,7 +8,9 @@ import { db } from "../lib/db/client";
 import { trips } from "../lib/db/schema/trips";
 import { tripMembers } from "../lib/db/schema/trip-members";
 import { expenses } from "../lib/db/schema/expenses";
+import type { NewExpense } from "../lib/db/schema/expenses";
 import { expenseSplits } from "../lib/db/schema/expense-splits";
+import type { NewExpenseSplit } from "../lib/db/schema/expense-splits";
 import { createAdminClient } from "../lib/supabase/admin";
 import { computeSplits } from "../lib/splits/compute";
 import type { SplitMode, SplitInput } from "../lib/splits/compute";
@@ -24,11 +26,11 @@ async function insertExpense(params: {
   tripId: string;
   paidByMemberId: string;
   description: string;
-  category: string;
+  category: NewExpense["category"];
   amount: number;
   currency: string;
   expenseDate: string;
-  splitMode: SplitMode;
+  splitMode: NewExpenseSplit["splitType"];
   splits: SplitInput[];
   createdByUserId: string;
 }) {
@@ -39,7 +41,7 @@ async function insertExpense(params: {
     tripId: params.tripId,
     paidByMemberId: params.paidByMemberId,
     description: params.description,
-    category: params.category as any,
+    category: params.category,
     amount: String(params.amount),
     currency: params.currency,
     expenseDate: params.expenseDate,
@@ -51,7 +53,7 @@ async function insertExpense(params: {
       expenseId: expense.id,
       memberId: s.memberId,
       shareAmount: String(s.shareAmount),
-      splitType: params.splitMode as any,
+      splitType: params.splitMode,
       splitValue: s.splitValue != null ? String(s.splitValue) : null,
     }))
   );
@@ -114,8 +116,8 @@ async function main() {
   let count = 0;
 
   async function add(
-    date: string, description: string, category: string,
-    amount: number, paidBy: string, splitMode: SplitMode, splitInputs: SplitInput[]
+    date: string, description: string, category: NewExpense["category"],
+    amount: number, paidBy: string, splitMode: NewExpenseSplit["splitType"], splitInputs: SplitInput[]
   ) {
     await insertExpense({
       tripId: trip.id, paidByMemberId: paidBy, description, category,

@@ -9,12 +9,25 @@ interface Props {
   currency: string;
 }
 
-function CustomTooltip({ active, payload, label, currency }: { active?: boolean; payload?: any[]; label?: string; currency: string }) {
+interface TooltipItem {
+  name: string;
+  value: number;
+  fill: string;
+}
+
+interface MemberTooltipProps {
+  active?: boolean;
+  label?: string;
+  payload?: TooltipItem[];
+  currency: string;
+}
+
+function CustomTooltip({ active, payload, label, currency }: MemberTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg space-y-1">
       <p className="font-semibold text-slate-700">{label}</p>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <p key={p.name} style={{ color: p.fill }} className="font-medium">
           {p.name}: {formatCurrency(p.value, currency)}
         </p>

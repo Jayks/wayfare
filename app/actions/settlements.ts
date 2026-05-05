@@ -28,17 +28,21 @@ export async function recordSettlement(input: RecordSettlementInput) {
     .where(and(eq(tripMembers.tripId, tripId), inArray(tripMembers.id, [fromMemberId, toMemberId])));
   if (tripMemberRows.length !== 2) return { ok: false, error: "Invalid members" } as const;
 
-  await db.insert(settlements).values({
-    tripId,
-    fromMemberId,
-    toMemberId,
-    amount: String(amount),
-    currency,
-    note: note || null,
-  });
+  try {
+    await db.insert(settlements).values({
+      tripId,
+      fromMemberId,
+      toMemberId,
+      amount: String(amount),
+      currency,
+      note: note || null,
+    });
 
-  revalidatePath(`/trips/${tripId}/settle`);
-  return { ok: true } as const;
+    revalidatePath(`/trips/${tripId}/settle`);
+    return { ok: true } as const;
+  } catch {
+    return { ok: false, error: "Failed to record settlement" } as const;
+  }
 }
 
 export async function deleteSettlement(settlementId: string, tripId: string) {
@@ -50,7 +54,11 @@ export async function deleteSettlement(settlementId: string, tripId: string) {
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 
-  await db.delete(settlements).where(eq(settlements.id, settlementId));
-  revalidatePath(`/trips/${tripId}/settle`);
-  return { ok: true } as const;
+  try {
+    await db.delete(settlements).where(eq(settlements.id, settlementId));
+    revalidatePath(`/trips/${tripId}/settle`);
+    return { ok: true } as const;
+  } catch {
+    return { ok: false, error: "Failed to delete settlement" } as const;
+  }
 }

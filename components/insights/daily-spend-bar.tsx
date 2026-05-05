@@ -9,12 +9,19 @@ interface Props {
   currency: string;
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipEntry {
+  active?: boolean;
+  label?: string;
+  payload?: Array<{ value: number }>;
+  currency: string;
+}
+
+function CustomTooltip({ active, payload, label, currency }: TooltipEntry) {
   if (!active || !payload?.length) return null;
   return (
     <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold text-slate-700">{label}</p>
-      <p className="text-cyan-600 font-medium">{formatCurrency(payload[0].value, payload[0].payload.currency ?? "INR")}</p>
+      <p className="text-cyan-600 font-medium">{formatCurrency(payload[0].value, currency)}</p>
     </div>
   );
 }
@@ -42,7 +49,7 @@ export function DailySpendBar({ data, currency }: Props) {
             tickLine={false}
             tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(6,182,212,0.08)" }} />
+          <Tooltip content={<CustomTooltip currency={currency} />} cursor={{ fill: "rgba(6,182,212,0.08)" }} />
           <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
             {data.map((entry, i) => (
               <Cell
