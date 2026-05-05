@@ -3,7 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db/client";
 import { settlements } from "@/lib/db/schema/settlements";
-import { eq } from "drizzle-orm";
+import { tripMembers } from "@/lib/db/schema/trip-members";
+import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getMembership } from "@/lib/db/queries/auth";
 import { recordSettlementSchema, type RecordSettlementInput } from "@/lib/validations/settlement";
@@ -22,6 +23,10 @@ export async function recordSettlement(input: RecordSettlementInput) {
   if (!membership) return { ok: false, error: "Not a member" } as const;
   if (membership.role !== "admin") return { ok: false, error: "Not authorized" } as const;
   if (fromMemberId === toMemberId) return { ok: false, error: "Cannot settle with yourself" } as const;
+
+  const tripMemberRows = await db.select({ id: tripMembers.id }).from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), inArray(tripMembers.id, [fromMemberId, toMemberId])));
+  if (tripMemberRows.length !== 2) return { ok: false, error: "Invalid members" } as const;
 
   await db.insert(settlements).values({
     tripId,

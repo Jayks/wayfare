@@ -24,6 +24,10 @@ export async function addGuestMember(input: { tripId: string; guestName: string 
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 
+  const [duplicate] = await db.select({ id: tripMembers.id }).from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.guestName, guestName)));
+  if (duplicate) return { ok: false, error: "A guest with this name already exists" } as const;
+
   const [member] = await db.insert(tripMembers).values({
     tripId,
     guestName,

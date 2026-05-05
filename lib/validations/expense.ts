@@ -10,7 +10,7 @@ export const addExpenseSchema = z.object({
   paidByMemberId: z.string().uuid(),
   description: z.string().min(1, "Description is required").max(200),
   category: z.enum(["food","accommodation","transport","sightseeing","shopping","activities","groceries","other"]),
-  amount: z.number().positive("Amount must be positive"),
+  amount: z.number().positive("Amount must be positive").max(999999.99, "Amount is too large"),
   currency: z.string().length(3),
   expenseDate: z.string().min(1, "Date is required"),
   endDate: z.string().optional(),

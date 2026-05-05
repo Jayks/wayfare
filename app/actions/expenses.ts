@@ -4,9 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db/client";
 import { expenses } from "@/lib/db/schema/expenses";
 import { expenseSplits } from "@/lib/db/schema/expense-splits";
+import { tripMembers } from "@/lib/db/schema/trip-members";
 import { addExpenseSchema, type AddExpenseInput } from "@/lib/validations/expense";
 import { computeSplits } from "@/lib/splits/compute";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getMembership } from "@/lib/db/queries/auth";
 import { revalidatePath } from "next/cache";
 
@@ -22,6 +23,10 @@ export async function addExpense(input: AddExpenseInput) {
 
   const membership = await getMembership(tripId, user.id);
   if (!membership) return { ok: false, error: "Not a member" } as const;
+
+  const [paidByMember] = await db.select({ id: tripMembers.id }).from(tripMembers)
+    .where(and(eq(tripMembers.id, paidByMemberId), eq(tripMembers.tripId, tripId)));
+  if (!paidByMember) return { ok: false, error: "Invalid member" } as const;
 
   const result = computeSplits(splitMode, amount, splits);
   if (!result.ok) return { ok: false, error: result.error } as const;
@@ -71,6 +76,10 @@ export async function updateExpense(expenseId: string, input: AddExpenseInput) {
   if (!membership) return { ok: false, error: "Not a member" } as const;
   if (expense.createdByUserId !== user.id && membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
+
+  const [paidByMember] = await db.select({ id: tripMembers.id }).from(tripMembers)
+    .where(and(eq(tripMembers.id, paidByMemberId), eq(tripMembers.tripId, tripId)));
+  if (!paidByMember) return { ok: false, error: "Invalid member" } as const;
 
   const result = computeSplits(splitMode, amount, splits);
   if (!result.ok) return { ok: false, error: result.error } as const;
