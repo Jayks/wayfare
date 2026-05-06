@@ -11,7 +11,7 @@ Wayfare is a group expense tracking app built for trips. Log what each person pa
 ## Features
 
 ### Trips
-- Create trips with a cover photo (Unsplash search), dates, currency, and optional budget
+- Create trips with a cover photo (Unsplash search), dates, currency, budget, and optional **trip plan/itinerary**
 - Invite members via shareable link or QR code — no account needed to join as a guest
 - Budget tracking with progress bar (green → amber → over-budget red)
 - Archive completed trips; restore anytime
@@ -23,9 +23,10 @@ Wayfare is a group expense tracking app built for trips. Log what each person pa
 - Edit, duplicate, or delete any expense
 - Filter by category, payer, date range — search by description
 - Sort by date or amount; running filtered total
-- **Quick-add parser**: type `dinner 2400 raj yesterday split 4` → form fills itself
+- **Quick-add parser**: type or **speak** `dinner 2400 raj yesterday split 4` → form fills itself
   - Powered by Claude Haiku (AI mode) with rule-based fallback when offline
   - Understands natural language: member names, relative dates, positional splits ("1st 2 members")
+  - **Voice input**: tap the mic, speak the expense — Web Speech API transcribes and AI parses automatically
 - Export all expenses as CSV
 
 ### Settlement
@@ -40,6 +41,7 @@ Wayfare is a group expense tracking app built for trips. Log what each person pa
 - **Per-trip**: KPI cards, daily spend bar, category donut, member contribution chart, 7 smart insight cards
 - **Group roles**: Trip Banker, Tab Master, High Roller, Fair Splitter, The Balancer, Traveler — computed per member
 - **Payment fairness score** per member (colour-coded bar)
+- **Plan vs Reality**: if you wrote a trip itinerary, Claude compares it against actual expenses and shows coverage %, what was covered, what was missed, and what surprised you
 - **All-trips portfolio**: total spend across trips, companion count, category habits, spend-per-trip comparison
 
 ### Collaboration

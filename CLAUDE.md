@@ -165,6 +165,7 @@ default_currency: text not null default 'INR'
 start_date: date
 end_date: date
 budget: numeric(12,2)           -- optional trip budget
+itinerary: text                 -- optional trip plan; used by AI narrative + adherence analysis
 is_archived: boolean not null default false
 created_by: uuid not null       -- auth.users.id
 share_token: uuid not null unique default gen_random_uuid()
@@ -419,14 +420,15 @@ wayfare/
 │       ├── settlements.ts  # recordSettlement, deleteSettlement
 │       ├── unsplash.ts     # searchUnsplash (server action wrapping the API)
 │       ├── parse-expense.ts  # parseExpenseWithAI — Claude Haiku expense parser
-│       └── narrative.ts      # generateTripNarrative — Claude Haiku trip story generator
+│       ├── narrative.ts      # generateTripNarrative — Claude Haiku trip story generator
+│       └── trip-adherence.ts # analyzeTripAdherence — plan vs reality comparison
 ├── components/
 │   ├── ui/                 # shadcn primitives (base-ui)
 │   ├── expense/
 │   │   ├── expense-card.tsx
 │   │   ├── expense-filters.tsx     # "use client" — search/filter/sort
 │   │   ├── split-editor.tsx        # "use client" — 4-mode splitter
-│   │   ├── quick-add-bar.tsx       # "use client" — AI/rule-based quick-add parser
+│   │   ├── quick-add-bar.tsx       # "use client" — AI/rule-based/voice quick-add parser
 │   │   ├── category-icon.tsx
 │   │   ├── delete-expense-button.tsx
 │   │   └── duplicate-expense-button.tsx
@@ -437,7 +439,8 @@ wayfare/
 │   │   ├── budget-bar.tsx          # spend vs budget progress
 │   │   ├── qr-invite.tsx           # "use client" — QR code dialog + copy link
 │   │   ├── summary-share-button.tsx # "use client" — Web Share API share button
-│   │   └── narrative-section.tsx   # "use client" — AI trip story generator
+│   │   ├── narrative-section.tsx   # "use client" — AI trip story generator
+│   │   └── adherence-card.tsx      # "use client" — plan vs reality insight card
 │   ├── settlement/
 │   │   ├── settlement-breakdown.tsx    # "How is this calculated?" collapsible
 │   │   └── member-debt-breakdown.tsx   # "use client" — per-member debt view
@@ -458,7 +461,8 @@ wayfare/
 │       └── realtime-refresh.tsx    # "use client" — mounts useTripRealtime
 ├── hooks/
 │   ├── use-trip-realtime.ts        # Supabase Realtime → router.refresh()
-│   └── use-warn-before-leave.ts   # beforeunload on dirty forms
+│   ├── use-warn-before-leave.ts    # beforeunload on dirty forms
+│   └── use-speech-recognition.ts  # Web Speech API — mic input for quick-add bar
 ├── lib/
 │   ├── db/
 │   │   ├── client.ts               # Drizzle + globalThis singleton
@@ -547,7 +551,7 @@ alter publication supabase_realtime add table trip_members;
 
 ### Core
 - Google OAuth login (Supabase Auth)
-- Create/edit/archive trips with cover photo (Unsplash), dates, currency, budget
+- Create/edit/archive trips with cover photo (Unsplash), dates, currency, budget, optional itinerary/plan
 - Invite members via shareable link + QR code
 - Add guest members (no account needed)
 - 4-mode expense splitting: equal, exact, percentage, shares
@@ -565,20 +569,23 @@ alter publication supabase_realtime add table trip_members;
 - Group roles per member: Trip Banker, Tab Master, High Roller, Fair Splitter, The Balancer, Traveler
 - Payment fairness score bar per member (green → amber → red)
 - Smarter insights: cross-trip comparisons, spend trajectory, budget forecast
+- Plan vs Reality adherence card (insights page): compares written itinerary against actual expenses via Claude Haiku — coverage %, covered/missed/surprise activities; only shown when trip has an itinerary
 
 ### Sharing & Export
 - Shareable public trip summary page (`/summary/[shareToken]`) — no auth required, OG image
-- AI-generated trip narrative on summary page (Claude Haiku, on-demand)
+- AI-generated trip narrative on summary page (Claude Haiku, on-demand); uses day-by-day expense timeline + itinerary as backbone
 - Web Share API on trip cards + trip detail page (falls back to clipboard copy)
 - QR code dialogs with copy-link fallback
 - CSV export of all trip expenses (`/api/trips/[id]/export`)
 
 ### AI (requires `ANTHROPIC_API_KEY`)
-- Quick-add expense parser: type `dinner 2400 raj yesterday split 4` → pre-fills the form
+- Quick-add expense parser: type or **speak** `dinner 2400 raj yesterday split 4` → pre-fills the form
   - AI mode (Claude Haiku): understands natural language, member names, positional splits ("1st 2", "last 3"), relative dates
   - Rule-based fallback: always works without AI key
   - Mode badge: `✨ AI` or `⚡ Basic`
-- Trip narrative generator on the summary page
+- Voice input (Phase 18): mic button in quick-add bar; Web Speech API transcribes speech → AI parser; auto-triggers on final result; hidden on unsupported browsers; `lang: en-IN`
+- Trip narrative generator on the summary page (day-by-day timeline + itinerary → travel story)
+- Plan vs Reality adherence analysis on the insights page
 
 ### UX
 - Glassmorphic design: frosted cards, gradient blobs, cyan/teal palette
@@ -695,7 +702,7 @@ pnpm seed:temple      # seed South India temple tour (20 members, 24 expenses, c
 | 15 | Smarter insights — cross-trip comparisons, spend trajectory, budget forecast | ✅ Done |
 | 16 | AI quick-add expense parser — natural language → pre-filled form (Claude Haiku + rule-based fallback) | ✅ Done |
 | 17 | CSV export + AI trip narrative (Claude Haiku generates a travel story on the summary page) | ✅ Done |
-| 18 | Voice input + receipt OCR | 🔲 Next |
+| 18 | Voice input (Web Speech API → AI parser); trip plan/itinerary field; richer narrative (day-by-day timeline); Plan vs Reality adherence card on insights page | ✅ Done |
 
 ---
 
