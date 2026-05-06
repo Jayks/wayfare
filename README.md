@@ -27,12 +27,14 @@ Wayfare is a group expense tracking app built for trips. Log what each person pa
   - Powered by Claude Haiku (AI mode) with rule-based fallback when offline
   - Understands natural language: member names, relative dates, positional splits ("1st 2 members")
   - **Voice input**: tap the mic, speak the expense — Web Speech API transcribes and AI parses automatically
+- **Chat import**: paste a WhatsApp or group chat snippet → AI extracts all expenses at once; preview and edit before bulk-adding
 - Export all expenses as CSV
 
 ### Settlement
 - Per-member net balances with animated count-up numbers
 - Minimum-transaction algorithm — at most `n-1` payments for `n` members
 - "Mark as paid" records a settlement and updates balances instantly
+- **UPI payment link** — "Pay UPI" button on rows where you owe money; enter recipient's UPI ID and tap Open to launch PhonePe/GPay/Paytm pre-filled
 - Full settlement history with delete
 - "How is this calculated?" collapsible 3-step breakdown
 - Per-member debt view: who owes whom, down to the rupee

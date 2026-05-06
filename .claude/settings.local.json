@@ -3,7 +3,10 @@
     "allow": [
       "Bash(pnpm test *)",
       "Bash(pnpm typecheck *)",
-      "Bash(pnpm dev *)"
+      "Bash(pnpm dev *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }

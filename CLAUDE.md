@@ -401,7 +401,8 @@ wayfare/
 │   │           ├── settle/
 │   │           │   ├── page.tsx
 │   │           │   ├── loading.tsx
-│   │           │   └── mark-paid-button.tsx
+│   │           │   ├── mark-paid-button.tsx
+│   │           │   └── upi-pay-button.tsx  # "use client" — UPI deep link (shown only when current user owes)
 │   │           └── insights/
 │   │               ├── page.tsx
 │   │               └── loading.tsx
@@ -421,7 +422,8 @@ wayfare/
 │       ├── unsplash.ts     # searchUnsplash (server action wrapping the API)
 │       ├── parse-expense.ts  # parseExpenseWithAI — Claude Haiku expense parser
 │       ├── narrative.ts      # generateTripNarrative — Claude Haiku trip story generator
-│       └── trip-adherence.ts # analyzeTripAdherence — plan vs reality comparison
+│       ├── trip-adherence.ts # analyzeTripAdherence — plan vs reality comparison
+│       └── parse-chat.ts     # parseChatExpenses — bulk extract expenses from chat text
 ├── components/
 │   ├── ui/                 # shadcn primitives (base-ui)
 │   ├── expense/
@@ -429,6 +431,7 @@ wayfare/
 │   │   ├── expense-filters.tsx     # "use client" — search/filter/sort
 │   │   ├── split-editor.tsx        # "use client" — 4-mode splitter
 │   │   ├── quick-add-bar.tsx       # "use client" — AI/rule-based/voice quick-add parser
+│   │   ├── chat-import-dialog.tsx  # "use client" — paste chat → bulk extract & add expenses
 │   │   ├── category-icon.tsx
 │   │   ├── delete-expense-button.tsx
 │   │   └── duplicate-expense-button.tsx
@@ -584,8 +587,12 @@ alter publication supabase_realtime add table trip_members;
   - Rule-based fallback: always works without AI key
   - Mode badge: `✨ AI` or `⚡ Basic`
 - Voice input (Phase 18): mic button in quick-add bar; Web Speech API transcribes speech → AI parser; auto-triggers on final result; hidden on unsupported browsers; `lang: en-IN`
+- Chat import: paste a WhatsApp/group chat snippet → Claude extracts all expenses at once; preview table with inline editing; bulk-add with per-row status
 - Trip narrative generator on the summary page (day-by-day timeline + itinerary → travel story)
 - Plan vs Reality adherence analysis on the insights page
+
+### Settlement
+- UPI payment deep link (`upi://pay?...`) on the settle page — only shown on rows where the current user is the payer; inline UPI ID input → opens PhonePe/GPay/Paytm pre-filled
 
 ### UX
 - Glassmorphic design: frosted cards, gradient blobs, cyan/teal palette
@@ -621,6 +628,8 @@ alter publication supabase_realtime add table trip_members;
 - **No barrel files** (`index.ts` re-exports). Import from the actual file.
 - **Comments**: explain *why*, not *what*.
 - **Fraunces font**: apply via `style={{ fontFamily: "var(--font-fraunces)" }}` — NOT a Tailwind class.
+- **Expense date defaults**: use `smartDefaultDate(trip.startDate, trip.endDate)` from `lib/utils.ts` — never hardcode `new Date().toISOString().split("T")[0]`. Logic: ongoing trip → today; trip not started or finished → start date.
+- **revalidatePath after mutations**: always use `revalidatePath('/trips/${tripId}', 'layout')` — not a page-specific path. Expenses affect settle, insights, and the dashboard; the layout variant invalidates the whole subtree at once.
 
 ---
 
