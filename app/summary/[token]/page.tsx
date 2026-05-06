@@ -3,11 +3,12 @@ import { db } from "@/lib/db/client";
 import { trips } from "@/lib/db/schema/trips";
 import { tripMembers } from "@/lib/db/schema/trip-members";
 import { expenses } from "@/lib/db/schema/expenses";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import { differenceInDays, parseISO } from "date-fns";
 import { formatDate } from "@/lib/utils";
 import { getCategory, CATEGORY_HEX } from "@/lib/categories";
 import { SummaryShareButton } from "@/components/trip/summary-share-button";
+import { NarrativeSection } from "@/components/trip/narrative-section";
 import Link from "next/link";
 import { Compass } from "lucide-react";
 import type { Metadata } from "next";
@@ -16,7 +17,7 @@ async function getSummaryData(token: string) {
   const [trip] = await db.select().from(trips).where(eq(trips.shareToken, token));
   if (!trip) return null;
 
-  const [memberRows, categoryRows, [expCount]] = await Promise.all([
+  const [memberRows, categoryRows, [expCount], topExpenseRows] = await Promise.all([
     db.select({ id: tripMembers.id }).from(tripMembers).where(eq(tripMembers.tripId, trip.id)),
     db
       .select({
@@ -30,6 +31,12 @@ async function getSummaryData(token: string) {
       .select({ n: sql<number>`count(*)::int` })
       .from(expenses)
       .where(eq(expenses.tripId, trip.id)),
+    db
+      .select({ description: expenses.description, amount: sql<number>`amount::float8` })
+      .from(expenses)
+      .where(eq(expenses.tripId, trip.id))
+      .orderBy(desc(expenses.amount))
+      .limit(5),
   ]);
 
   const memberCount = memberRows.length;
@@ -43,7 +50,7 @@ async function getSummaryData(token: string) {
     tripDays = Math.max(1, differenceInDays(parseISO(trip.endDate), parseISO(trip.startDate)) + 1);
   }
 
-  return { trip, memberCount, expenseCount, categoryTotals: sorted, totalSpend, perPerson, tripDays };
+  return { trip, memberCount, expenseCount, categoryTotals: sorted, totalSpend, perPerson, tripDays, topExpenses: topExpenseRows };
 }
 
 export async function generateMetadata({
@@ -74,7 +81,7 @@ export default async function SummaryPage({
   const data = await getSummaryData(token);
   if (!data) notFound();
 
-  const { trip, memberCount, expenseCount, categoryTotals, totalSpend, perPerson, tripDays } = data;
+  const { trip, memberCount, expenseCount, categoryTotals, totalSpend, perPerson, tripDays, topExpenses } = data;
   const currency = trip.defaultCurrency;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const shareUrl = `${appUrl}/summary/${token}`;
@@ -203,6 +210,26 @@ export default async function SummaryPage({
               })}
             </div>
           </div>
+        )}
+
+        {/* AI narrative */}
+        {hasSpend && (
+          <NarrativeSection
+            tripName={trip.name}
+            description={trip.description ?? null}
+            startDate={trip.startDate ?? null}
+            endDate={trip.endDate ?? null}
+            tripDays={tripDays}
+            memberCount={memberCount}
+            totalSpend={totalSpend}
+            currency={currency}
+            categoryBreakdown={categoryTotals.map((c) => ({
+              category: c.category,
+              total: c.total,
+              pct: totalSpend > 0 ? Math.round((c.total / totalSpend) * 100) : 0,
+            }))}
+            topExpenses={topExpenses}
+          />
         )}
 
         {/* Share */}

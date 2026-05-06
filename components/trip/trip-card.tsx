@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
 import type { Trip } from "@/lib/db/schema/trips";
 import { formatDate } from "@/lib/utils";
+import { TripCardShareButtons } from "./trip-card-share-buttons";
 
 interface TripCardProps {
   trip: Trip;
@@ -9,10 +10,13 @@ interface TripCardProps {
 }
 
 export function TripCard({ trip, memberCount }: TripCardProps) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const summaryUrl = `${appUrl}/summary/${trip.shareToken}`;
+
   return (
-    <Link href={`/trips/${trip.id}`} className="group block">
-      <div className="glass rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-200 group-hover:-translate-y-0.5">
-        {/* Cover */}
+    <div className="group glass rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-200 hover:-translate-y-0.5">
+      {/* Cover — clicking navigates into the trip */}
+      <Link href={`/trips/${trip.id}`} className="block">
         <div className="h-44 relative">
           {trip.coverPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -42,19 +46,22 @@ export function TripCard({ trip, memberCount }: TripCardProps) {
             )}
           </div>
         </div>
+      </Link>
 
-        {/* Footer */}
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-slate-500 text-xs">
-            <Users className="w-3.5 h-3.5" />
-            {memberCount} {memberCount === 1 ? "member" : "members"}
-          </div>
-          <div className="flex items-center gap-1 text-xs font-medium text-cyan-600">
+      {/* Footer */}
+      <div className="px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-slate-500 text-xs">
+          <Users className="w-3.5 h-3.5" />
+          {memberCount} {memberCount === 1 ? "member" : "members"}
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="flex items-center gap-1 text-xs font-medium text-cyan-600 mr-1">
             <MapPin className="w-3 h-3" />
             {trip.defaultCurrency}
-          </div>
+          </span>
+          <TripCardShareButtons url={summaryUrl} tripName={trip.name} />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

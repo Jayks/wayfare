@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getTripWithMembers } from "@/lib/db/queries/trips";
 import { getTripName } from "@/lib/db/queries/meta";
 import { getExpenses } from "@/lib/db/queries/expenses";
-import { ArrowLeft, Users, Receipt, Wallet, Share2, BarChart2, Pencil, Sparkles, ArrowRight } from "lucide-react";
+import { ArrowLeft, Users, Receipt, Wallet, BarChart2, Pencil, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { BudgetBar } from "@/components/trip/budget-bar";
@@ -166,11 +166,15 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
 
       {/* Invite link */}
       {isAdmin && (
-        <div className="glass rounded-xl p-4 flex items-center gap-3 mb-4">
-          <Share2 className="w-4 h-4 text-cyan-500 shrink-0" />
-          <p className="text-sm text-slate-600 truncate flex-1">{inviteUrl}</p>
-          <ShareButton url={inviteUrl} />
-          <QRInvite url={inviteUrl} />
+        <div className="glass rounded-xl p-4 flex items-center justify-between mb-4">
+          <div>
+            <p className="text-sm font-medium text-slate-700">Invite to trip</p>
+            <p className="text-xs text-slate-500">Share with your group</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <ShareButton url={inviteUrl} tripName={trip.name} />
+            <QRInvite url={inviteUrl} />
+          </div>
         </div>
       )}
 

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { addExpenseSchema, type AddExpenseInput } from "@/lib/validations/expense";
 import { addExpense } from "@/app/actions/expenses";
 import { SplitEditor } from "@/components/expense/split-editor";
+import { QuickAddBar } from "@/components/expense/quick-add-bar";
 import { CATEGORIES } from "@/lib/categories";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ import type { Trip } from "@/lib/db/schema/trips";
 import type { TripMember } from "@/lib/db/schema/trip-members";
 import { getMemberName } from "@/lib/utils";
 import type { SplitMode, SplitInput } from "@/lib/splits/compute";
+import type { ParsedExpense } from "@/lib/parser/parse-expense";
 
 interface Props {
   trip: Trip;
@@ -24,6 +26,10 @@ export function AddExpenseForm({ trip, members }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [splitMode, setSplitMode] = useState<SplitMode>("equal");
+  const [splitEditorKey, setSplitEditorKey] = useState(0);
+  const [initialSplitIds, setInitialSplitIds] = useState<Set<string>>(
+    new Set(members.map((m) => m.id))
+  );
 
   const {
     register,
@@ -59,6 +65,29 @@ export function AddExpenseForm({ trip, members }: Props) {
     setValue("splits", newSplits);
   }
 
+  function handleQuickAdd(parsed: ParsedExpense) {
+    if (parsed.description) setValue("description", parsed.description);
+    if (parsed.amount !== null) setValue("amount", parsed.amount);
+    if (parsed.paidByMemberId) setValue("paidByMemberId", parsed.paidByMemberId);
+    if (parsed.expenseDate) setValue("expenseDate", parsed.expenseDate);
+    setValue("category", parsed.category);
+
+    let nextIds: Set<string>;
+    if (parsed.splitMemberIds && parsed.splitMemberIds.length > 0) {
+      // AI resolved specific member IDs (by name or position)
+      nextIds = new Set(parsed.splitMemberIds);
+    } else if (typeof parsed.splitCount === "number") {
+      // Simple count — take first N members
+      nextIds = new Set(members.slice(0, parsed.splitCount).map((m) => m.id));
+    } else {
+      // All members (default)
+      nextIds = new Set(members.map((m) => m.id));
+    }
+
+    setInitialSplitIds(nextIds);
+    setSplitEditorKey((k) => k + 1);
+  }
+
   async function onSubmit(data: AddExpenseInput) {
     if (trip.startDate && data.expenseDate < trip.startDate) {
       toast.error(`Date must be on or after ${trip.startDate}`);
@@ -87,6 +116,14 @@ export function AddExpenseForm({ trip, members }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <input type="hidden" {...register("tripId")} />
+
+      <QuickAddBar
+        members={members}
+        currency={watch("currency")}
+        tripStartDate={trip.startDate}
+        tripEndDate={trip.endDate}
+        onParsed={handleQuickAdd}
+      />
 
       {/* Description */}
       <div>
@@ -187,12 +224,14 @@ export function AddExpenseForm({ trip, members }: Props) {
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-1.5">Split</label>
         <SplitEditor
+          key={splitEditorKey}
           members={members}
           amount={amount}
           currency={currency}
           mode={splitMode}
           onModeChange={handleModeChange}
           onSplitsChange={handleSplitsChange}
+          initialSelectedIds={initialSplitIds}
         />
         {errors.splits && <p className="mt-1 text-xs text-red-500">Select at least one member.</p>}
       </div>

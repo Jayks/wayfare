@@ -43,6 +43,7 @@ The name plays on *wayfarer* (a traveler) and *fare* (the cost of a journey).
 | Charts | **Recharts** | 3.x | Insights pages only |
 | Icons | **lucide-react** | latest | |
 | QR codes | **qrcode.react** | latest | Invite QR dialogs |
+| AI | **@anthropic-ai/sdk** | 0.94.x | Expense parser + trip narrative (claude-haiku-4-5-20251001) |
 | Database | **Supabase Postgres** | — | Free tier |
 | Auth | **Supabase Auth** (Google OAuth) | — | @supabase/ssr v0.6 |
 | Realtime | **Supabase Realtime** | — | postgres_changes → router.refresh() |
@@ -107,6 +108,25 @@ net = totalPaid - totalOwed + settlementsSent - settlementsReceived
 ```
 - `settlementsSent`: you paid someone → reduces your debt → **adds** to net
 - `settlementsReceived`: someone paid you → your receivable shrinks → **subtracts** from net
+
+### Anthropic SDK — instantiate inside the function, not at module level
+
+```typescript
+// ✅ correct — key resolved at call time
+export async function myAction() {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  ...
+}
+
+// ❌ wrong — module evaluated before env vars are available in Next.js server action runtime
+const client = new Anthropic();
+export async function myAction() { ... }
+```
+
+Also: strip markdown code fences from responses before `JSON.parse` — Haiku wraps JSON in ` ```json ``` ` despite instructions:
+```typescript
+const jsonText = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+```
 
 ### Trip member count on cards
 
@@ -387,26 +407,37 @@ wayfare/
 │   ├── join/[token]/
 │   │   ├── page.tsx
 │   │   └── join-button.tsx
+│   ├── summary/[token]/
+│   │   ├── page.tsx            # public shareable trip summary (no auth required)
+│   │   └── opengraph-image.tsx # OG image 1200×630
+│   ├── api/
+│   │   └── trips/[id]/export/route.ts  # GET → CSV download (auth-guarded)
 │   └── actions/
 │       ├── trips.ts        # createTrip, updateTrip, deleteTrip, archiveTrip, regenerateShareToken
 │       ├── expenses.ts     # addExpense, updateExpense, deleteExpense, duplicateExpense
 │       ├── members.ts      # addGuestMember, removeMember, joinTrip
 │       ├── settlements.ts  # recordSettlement, deleteSettlement
-│       └── unsplash.ts     # searchUnsplash (server action wrapping the API)
+│       ├── unsplash.ts     # searchUnsplash (server action wrapping the API)
+│       ├── parse-expense.ts  # parseExpenseWithAI — Claude Haiku expense parser
+│       └── narrative.ts      # generateTripNarrative — Claude Haiku trip story generator
 ├── components/
 │   ├── ui/                 # shadcn primitives (base-ui)
 │   ├── expense/
 │   │   ├── expense-card.tsx
 │   │   ├── expense-filters.tsx     # "use client" — search/filter/sort
 │   │   ├── split-editor.tsx        # "use client" — 4-mode splitter
+│   │   ├── quick-add-bar.tsx       # "use client" — AI/rule-based quick-add parser
 │   │   ├── category-icon.tsx
 │   │   ├── delete-expense-button.tsx
 │   │   └── duplicate-expense-button.tsx
 │   ├── trip/
-│   │   ├── trip-card.tsx
+│   │   ├── trip-card.tsx           # server — cover links to trip; footer has share buttons
+│   │   ├── trip-card-share-buttons.tsx  # "use client" — Web Share API + QR dialog
 │   │   ├── cover-photo-picker.tsx  # "use client" — Unsplash dialog
 │   │   ├── budget-bar.tsx          # spend vs budget progress
-│   │   └── qr-invite.tsx           # "use client" — QR code dialog
+│   │   ├── qr-invite.tsx           # "use client" — QR code dialog + copy link
+│   │   ├── summary-share-button.tsx # "use client" — Web Share API share button
+│   │   └── narrative-section.tsx   # "use client" — AI trip story generator
 │   ├── settlement/
 │   │   ├── settlement-breakdown.tsx    # "How is this calculated?" collapsible
 │   │   └── member-debt-breakdown.tsx   # "use client" — per-member debt view
@@ -447,6 +478,8 @@ wayfare/
 │   │   ├── server.ts               # createServerClient (RSC / server actions)
 │   │   ├── client.ts               # createBrowserClient
 │   │   └── admin.ts                # service-role client (for admin tasks)
+│   ├── parser/
+│   │   └── parse-expense.ts        # parseExpenseText — pure rule-based parser + ParsedExpense type
 │   ├── splits/
 │   │   ├── compute.ts
 │   │   └── compute.test.ts         # 16 tests
@@ -464,6 +497,7 @@ wayfare/
 │   └── utils.ts                    # cn(), formatCurrency(), formatDate(), getMemberName()
 ├── scripts/
 │   ├── seed-test.ts                # pnpm seed — creates Goa trip, 10 members, 30 expenses
+│   ├── seed-temple-tour.ts         # pnpm seed:temple — South India temple circuit, 20 members, 24 expenses
 │   └── verify-seed.ts              # verifies seed data integrity
 ├── drizzle/
 │   └── policies.sql                # all RLS policies for all 5 tables
@@ -528,6 +562,23 @@ alter publication supabase_realtime add table trip_members;
 ### Analytics
 - Per-trip insights: KPI cards (animated), category donut, daily spend bar, member contribution bar, 7 smart insight cards
 - All-trips portfolio: total spend, companion count, category habits, trip comparison
+- Group roles per member: Trip Banker, Tab Master, High Roller, Fair Splitter, The Balancer, Traveler
+- Payment fairness score bar per member (green → amber → red)
+- Smarter insights: cross-trip comparisons, spend trajectory, budget forecast
+
+### Sharing & Export
+- Shareable public trip summary page (`/summary/[shareToken]`) — no auth required, OG image
+- AI-generated trip narrative on summary page (Claude Haiku, on-demand)
+- Web Share API on trip cards + trip detail page (falls back to clipboard copy)
+- QR code dialogs with copy-link fallback
+- CSV export of all trip expenses (`/api/trips/[id]/export`)
+
+### AI (requires `ANTHROPIC_API_KEY`)
+- Quick-add expense parser: type `dinner 2400 raj yesterday split 4` → pre-fills the form
+  - AI mode (Claude Haiku): understands natural language, member names, positional splits ("1st 2", "last 3"), relative dates
+  - Rule-based fallback: always works without AI key
+  - Mode badge: `✨ AI` or `⚡ Basic`
+- Trip narrative generator on the summary page
 
 ### UX
 - Glassmorphic design: frosted cards, gradient blobs, cyan/teal palette
@@ -597,7 +648,10 @@ DATABASE_URL=                        # Direct Postgres URI for Drizzle (port 543
 UNSPLASH_ACCESS_KEY=                 # Unsplash API access key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=Wayfare
+ANTHROPIC_API_KEY=                   # optional — enables AI expense parser + trip narrative
 ```
+
+**ANTHROPIC_API_KEY**: Without it, the quick-add bar falls back to rule-based parsing and the narrative section shows a config error. The key must be present when the dev server **starts** — restart `pnpm dev` after adding it.
 
 **DATABASE_URL note**: URL-encode special characters in the password:
 - `#` → `%23`, `@` → `%40`, `[` → `%5B`, `]` → `%5D`
@@ -615,6 +669,7 @@ pnpm test --run       # Vitest (single run)
 pnpm db:push          # push Drizzle schema to Supabase
 pnpm db:studio        # Drizzle Studio (DB browser)
 pnpm seed             # seed test data (Goa trip, 10 members, 30 expenses)
+pnpm seed:temple      # seed South India temple tour (20 members, 24 expenses, current user as admin)
 ```
 
 ---
@@ -633,39 +688,55 @@ pnpm seed             # seed test data (Goa trip, 10 members, 30 expenses)
 | 8 | Expense intelligence: search, category filter, payer filter, date range, sort, running filtered total | ✅ Done |
 | 9 | Realtime (useTripRealtime + router.refresh()), optimistic expense delete with rollback | ✅ Done |
 | 10 | Member debt breakdown, QR invite, expense duplication, budget tracking, trip archiving | ✅ Done |
-| 11 | **Deploy to Vercel** — production Supabase, env vars, live URL | 🔲 Next |
+| 11 | Deploy to Vercel — live at https://wayfare-sigma.vercel.app | ✅ Done |
+| 12 | Platform admin dashboard (admin-only, guarded by PLATFORM_ADMIN_EMAIL env var) | ✅ Done |
+| 13 | Shareable trip summary card — public `/summary/[shareToken]` page + OG image | ✅ Done |
+| 14 | Group roles (Trip Banker, Tab Master, etc.) + payment fairness score on per-trip insights | ✅ Done |
+| 15 | Smarter insights — cross-trip comparisons, spend trajectory, budget forecast | ✅ Done |
+| 16 | AI quick-add expense parser — natural language → pre-filled form (Claude Haiku + rule-based fallback) | ✅ Done |
+| 17 | CSV export + AI trip narrative (Claude Haiku generates a travel story on the summary page) | ✅ Done |
+| 18 | Voice input + receipt OCR | 🔲 Next |
 
 ---
 
-## 17. Phase 11 — Deploy Checklist
+## 17. Deployment
 
 **Production URL**: https://wayfare-sigma.vercel.app
 **Git repo**: https://github.com/Jayks/wayfare.git (branch: main)
-**Supabase**: currently using dev project (production project TBD)
+**Supabase**: dev project in use for production (separate prod project deferred)
 
-1. **Create production Supabase project** (separate from dev) — deferred
-   - Apply all schema via `pnpm db:push` (point DATABASE_URL at prod DB)
-   - Run `drizzle/policies.sql` in SQL Editor
-   - Run the Realtime publication SQL
-   - Configure Google OAuth provider with production callback URL
-2. **Vercel deployment** ✅ Done
-   - Repo imported: `Jayks/wayfare`
-   - All env vars set (dev Supabase for now)
-   - `NEXT_PUBLIC_APP_URL` = `https://wayfare-sigma.vercel.app`
-   - Supabase redirect URL: `https://wayfare-sigma.vercel.app/auth/callback` added
-   - **DATABASE_URL must use Session Pooler** (not direct connection) — Vercel can't reach `db.[ref].supabase.co:5432` without Supabase IPv4 add-on. Use: `postgresql://postgres.[ref]:[password]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres`
-3. **Post-deploy**
-   - Test invite flow end-to-end with 2+ real Google accounts
-   - Verify realtime works (two browser tabs, one adds expense)
-   - Run Lighthouse audit
+### Vercel env vars required
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+DATABASE_URL          ← must use Session Pooler URL, not direct connection
+UNSPLASH_ACCESS_KEY
+NEXT_PUBLIC_APP_URL=https://wayfare-sigma.vercel.app
+NEXT_PUBLIC_APP_NAME=Wayfare
+ANTHROPIC_API_KEY     ← optional; AI features degrade gracefully without it
+PLATFORM_ADMIN_EMAIL  ← comma-separated admin emails for /admin dashboard
+```
+
+**DATABASE_URL on Vercel**: must use the Session Pooler endpoint — Vercel cannot reach `db.[ref].supabase.co:5432` directly without the Supabase IPv4 add-on:
+```
+postgresql://postgres.[ref]:[password]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+```
+
+### Supabase setup (run once on a new project)
+1. `pnpm db:push` — push Drizzle schema
+2. Run `drizzle/policies.sql` in SQL Editor (RLS)
+3. Run the Realtime publication SQL (see section 10)
+4. Add Google OAuth callback: `https://wayfare-sigma.vercel.app/auth/callback`
 
 ---
 
 ## 18. What is OUT of scope (v1)
 
 - Email/push notifications
-- Receipt photo uploads
-- PDF/Excel export
+- Receipt photo uploads (Phase 18 — planned)
+- Voice input (Phase 18 — planned)
+- PDF export (CSV export is done; PDF is not)
 - Multi-currency FX within a trip
 - PWA / offline mode
 - Mobile app

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getTripWithMembers } from "@/lib/db/queries/trips";
 import { getExpenses } from "@/lib/db/queries/expenses";
 import { getTripName } from "@/lib/db/queries/meta";
-import { ArrowLeft, Plus, Receipt } from "lucide-react";
+import { ArrowLeft, Plus, Receipt, Download } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ExpenseFilters } from "@/components/expense/expense-filters";
@@ -40,6 +40,16 @@ export default async function ExpensesPage({ params }: { params: Promise<{ id: s
         <h1 className="text-2xl text-slate-800 flex-1" style={{ fontFamily: "var(--font-fraunces)" }}>
           Expenses
         </h1>
+        {expenses.length > 0 && (
+          <a
+            href={`/api/trips/${id}/export`}
+            download
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 bg-white/60 hover:bg-white/80 border border-slate-200 px-3 py-2 rounded-xl transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </a>
+        )}
         <Link
           href={`/trips/${id}/expenses/new`}
           className="inline-flex items-center gap-1.5 bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl px-4 py-2 shadow-md shadow-cyan-500/25 transition-all"

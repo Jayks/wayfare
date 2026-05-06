@@ -4,39 +4,46 @@
 
 Wayfare is a group expense tracking app built for trips. Log what each person paid, choose how to split it, and let Wayfare compute who owes whom — with the minimum number of payments. No spreadsheets, no awkward IOUs.
 
+**Live**: https://wayfare-sigma.vercel.app
+
 ---
 
 ## Features
 
 ### Trips
 - Create trips with a cover photo (Unsplash search), dates, currency, and optional budget
-- Invite members via shareable link or QR code
-- Add guest members who don't have an account
-- Budget tracking with progress bar (green → amber → over budget red)
-- Archive completed trips
+- Invite members via shareable link or QR code — no account needed to join as a guest
+- Budget tracking with progress bar (green → amber → over-budget red)
+- Archive completed trips; restore anytime
+- Shareable public trip summary page — stats, category breakdown, and an AI-written travel story
 
 ### Expenses
 - Log expenses with 4 split modes: **equal**, **exact amount**, **percentage**, **shares**
 - 8 expense categories with icons and colour coding
-- Edit or duplicate any expense
+- Edit, duplicate, or delete any expense
 - Filter by category, payer, date range — search by description
-- Sort by date or amount
-- Expenses disappear instantly on delete (optimistic UI, rolls back on error)
+- Sort by date or amount; running filtered total
+- **Quick-add parser**: type `dinner 2400 raj yesterday split 4` → form fills itself
+  - Powered by Claude Haiku (AI mode) with rule-based fallback when offline
+  - Understands natural language: member names, relative dates, positional splits ("1st 2 members")
+- Export all expenses as CSV
 
 ### Settlement
-- Per-member net balances with animated count-up
+- Per-member net balances with animated count-up numbers
 - Minimum-transaction algorithm — at most `n-1` payments for `n` members
-- "Mark as paid" records a settlement and updates balances
-- Full settlement history
-- "How is this calculated?" — 3-step breakdown explaining the math
+- "Mark as paid" records a settlement and updates balances instantly
+- Full settlement history with delete
+- "How is this calculated?" collapsible 3-step breakdown
 - Per-member debt view: who owes whom, down to the rupee
 
 ### Insights
-- **Per-trip**: total spend, per-person average, daily average, expense count, spend-by-category donut, daily spend bar, member contribution chart, 7 smart insight cards
-- **All trips**: portfolio view — total spend, companion count, category habits, spend-per-trip comparison
+- **Per-trip**: KPI cards, daily spend bar, category donut, member contribution chart, 7 smart insight cards
+- **Group roles**: Trip Banker, Tab Master, High Roller, Fair Splitter, The Balancer, Traveler — computed per member
+- **Payment fairness score** per member (colour-coded bar)
+- **All-trips portfolio**: total spend across trips, companion count, category habits, spend-per-trip comparison
 
 ### Collaboration
-- Supabase Realtime — changes by one member appear for all others without refresh
+- Supabase Realtime — changes appear for all members without refresh
 - Member avatars with deterministic colour initials
 - Real names from Google OAuth stored at join time
 
@@ -51,11 +58,12 @@ Wayfare is a group expense tracking app built for trips. Log what each person pa
 | UI | shadcn/ui (@base-ui/react) |
 | Animation | Framer Motion |
 | Charts | Recharts |
+| AI | Anthropic SDK (Claude Haiku) |
 | Database | Supabase Postgres + Drizzle ORM |
 | Auth | Supabase Auth (Google OAuth) |
 | Realtime | Supabase Realtime |
 | Validation | Zod + react-hook-form |
-| Deployment | Vercel (free tier) |
+| Deployment | Vercel |
 
 ---
 
@@ -68,11 +76,12 @@ Wayfare is a group expense tracking app built for trips. Log what each person pa
 - A Supabase project (free tier works)
 - A Google Cloud Console OAuth app (free)
 - An Unsplash developer account (free)
+- An Anthropic API key — optional, enables AI expense parsing and trip narratives
 
 ### 1. Clone and install
 
 ```bash
-git clone <your-repo-url> wayfare
+git clone https://github.com/Jayks/wayfare.git
 cd wayfare
 pnpm install
 ```
@@ -93,19 +102,20 @@ DATABASE_URL=postgresql://postgres:your-password@db.your-project.supabase.co:543
 UNSPLASH_ACCESS_KEY=your_access_key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=Wayfare
+ANTHROPIC_API_KEY=sk-ant-...   # optional
 ```
 
-> **Note**: URL-encode special characters in the DATABASE_URL password: `#` → `%23`, `@` → `%40`
+> **Note**: URL-encode special characters in DATABASE_URL password: `#` → `%23`, `@` → `%40`
+>
+> **Note**: Restart `pnpm dev` after adding `ANTHROPIC_API_KEY` — env vars are read at server startup.
 
 ### 3. Set up the database
-
-Push the Drizzle schema to Supabase:
 
 ```bash
 pnpm db:push
 ```
 
-Apply Row-Level Security policies in the **Supabase SQL Editor** — copy and run the contents of `drizzle/policies.sql`.
+Apply Row-Level Security policies in the **Supabase SQL Editor** — copy and run `drizzle/policies.sql`.
 
 Enable Realtime on the required tables (also in SQL Editor):
 
@@ -136,14 +146,15 @@ Open [http://localhost:3000](http://localhost:3000)
 ## Development Commands
 
 ```bash
-pnpm dev          # start dev server
-pnpm build        # production build
-pnpm typecheck    # TypeScript check
-pnpm test         # Vitest unit tests (watch)
-pnpm test --run   # single test run
-pnpm db:push      # sync schema to Supabase
-pnpm db:studio    # Drizzle Studio (visual DB browser)
-pnpm seed         # seed a test trip (10 members, 30 expenses)
+pnpm dev            # start dev server
+pnpm build          # production build
+pnpm typecheck      # TypeScript check
+pnpm test           # Vitest unit tests (watch)
+pnpm test --run     # single test run
+pnpm db:push        # sync schema to Supabase
+pnpm db:studio      # Drizzle Studio (visual DB browser)
+pnpm seed           # seed a Goa trip (10 members, 30 expenses, all split modes)
+pnpm seed:temple    # seed a South India temple tour (20 members, 24 expenses)
 ```
 
 ---
@@ -151,15 +162,15 @@ pnpm seed         # seed a test trip (10 members, 30 expenses)
 ## Project Structure
 
 ```
-app/              Next.js App Router pages and server actions
+app/              Next.js App Router pages, API routes, and server actions
 components/       React components (ui, expense, trip, settlement, insights, shared)
 hooks/            Client-side hooks (realtime, form warnings)
-lib/              Business logic, DB queries, schemas, algorithms, utilities
-scripts/          Seed and verify scripts
+lib/              Business logic, DB queries, schemas, algorithms, parser, utilities
+scripts/          Seed scripts
 drizzle/          RLS policies SQL
 ```
 
-See `CLAUDE.md` for the full detailed structure and all architectural decisions.
+See `CLAUDE.md` for the complete structure, all architectural decisions, and gotchas.
 
 ---
 
@@ -171,40 +182,46 @@ See `CLAUDE.md` for the full detailed structure and all architectural decisions.
 pnpm test --run
 ```
 
-Seed a realistic test trip for manual testing:
+Seed realistic test data for manual testing:
 
 ```bash
 pnpm seed
-# Creates "Goa Summer 2025" — 10 members, 30 expenses across all split modes
+# "Goa Summer 2025" — 10 members, 30 expenses across all split modes and categories
+
+pnpm seed:temple
+# "South India Temple Circuit 2026" — 20 members, 24 expenses, current user as admin
 ```
 
 ---
 
 ## Deployment
 
-### Vercel (recommended)
+### Vercel
 
-1. Push to a Git repo
-2. Import the repo in [Vercel](https://vercel.com)
-3. Add all environment variables from `.env.local.example` (production values)
-4. Set `NEXT_PUBLIC_APP_URL` to your production domain
-5. Deploy
+1. Push to a Git repo and import in [Vercel](https://vercel.com)
+2. Add all env vars from `.env.local.example` (use production values)
+3. Set `NEXT_PUBLIC_APP_URL` to your production domain
+4. **DATABASE_URL on Vercel** must use the Session Pooler endpoint — not the direct connection:
+   ```
+   postgresql://postgres.[ref]:[password]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+   ```
 
 ### Production Supabase
 
-Create a **separate** Supabase project for production — don't share the dev database. Repeat the schema push and SQL setup steps against the production project.
+Create a **separate** Supabase project for production. Repeat the `db:push`, RLS SQL, and Realtime SQL steps against the production project.
 
 ---
 
 ## Architecture Notes
 
-- **Server-first**: React Server Components handle all data fetching. Client components handle interactivity only.
-- **No REST API routes**: All mutations go through Next.js Server Actions (`app/actions/`).
-- **Drizzle only**: All database reads/writes use Drizzle ORM. The Supabase JS client is only used for auth and realtime subscriptions.
-- **RLS everywhere**: Database enforces access control. All 5 tables have Row-Level Security enabled.
-- **Realtime via router.refresh()**: Supabase Realtime triggers `router.refresh()` — Next.js re-runs server components and returns fresh data. No client-side cache management needed.
+- **Server-first**: React Server Components handle all data fetching. `"use client"` only for state, effects, browser APIs, and charts.
+- **No REST API routes for mutations**: All writes go through Next.js Server Actions (`app/actions/`). The one exception is the CSV export, which is a GET route handler.
+- **Drizzle only**: All DB reads/writes use Drizzle ORM. The Supabase JS client is only used for auth and realtime.
+- **RLS everywhere**: All 5 tables have Row-Level Security. The DB enforces access control independently of the app layer.
+- **AI graceful degradation**: All AI features (quick-add parser, trip narrative) fall back cleanly when `ANTHROPIC_API_KEY` is absent or the API is unavailable.
+- **Realtime via router.refresh()**: Supabase Realtime triggers `router.refresh()` — no client-side cache management needed.
 
-For complete architectural decisions, gotchas, and conventions, see [CLAUDE.md](./CLAUDE.md).
+For complete architectural decisions, gotchas, and conventions see [CLAUDE.md](./CLAUDE.md).
 
 ---
 
