@@ -3,7 +3,7 @@ import { db } from "@/lib/db/client";
 import { trips } from "@/lib/db/schema/trips";
 import { tripMembers } from "@/lib/db/schema/trip-members";
 import { expenses } from "@/lib/db/schema/expenses";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, asc } from "drizzle-orm";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { differenceInDays, parseISO } from "date-fns";
@@ -20,7 +20,7 @@ const getSummaryData = cache(async function getSummaryData(token: string) {
   const [trip] = await db.select().from(trips).where(eq(trips.shareToken, token));
   if (!trip) return null;
 
-  const [memberRows, categoryRows, [expCount], topExpenseRows] = await Promise.all([
+  const [memberRows, categoryRows, [expCount], allExpenseRows] = await Promise.all([
     db.select({ id: tripMembers.id }).from(tripMembers).where(eq(tripMembers.tripId, trip.id)),
     db
       .select({
@@ -35,11 +35,14 @@ const getSummaryData = cache(async function getSummaryData(token: string) {
       .from(expenses)
       .where(eq(expenses.tripId, trip.id)),
     db
-      .select({ description: expenses.description, amount: sql<number>`amount::float8` })
+      .select({
+        description: expenses.description,
+        category: expenses.category,
+        expenseDate: expenses.expenseDate,
+      })
       .from(expenses)
       .where(eq(expenses.tripId, trip.id))
-      .orderBy(desc(expenses.amount))
-      .limit(5),
+      .orderBy(asc(expenses.expenseDate)),
   ]);
 
   const memberCount = memberRows.length;
@@ -48,12 +51,24 @@ const getSummaryData = cache(async function getSummaryData(token: string) {
   const totalSpend = sorted.reduce((s, c) => s + c.total, 0);
   const perPerson = memberCount > 0 ? totalSpend / memberCount : 0;
 
+  // Group expenses chronologically by date for the narrative timeline
+  const timelineMap = new Map<string, { description: string; category: string }[]>();
+  for (const e of allExpenseRows) {
+    const day = e.expenseDate ?? "unknown";
+    const arr = timelineMap.get(day) ?? [];
+    arr.push({ description: e.description, category: e.category });
+    timelineMap.set(day, arr);
+  }
+  const dailyTimeline = Array.from(timelineMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, entries]) => ({ date, entries }));
+
   let tripDays = 0;
   if (trip.startDate && trip.endDate) {
     tripDays = Math.max(1, differenceInDays(parseISO(trip.endDate), parseISO(trip.startDate)) + 1);
   }
 
-  return { trip, memberCount, expenseCount, categoryTotals: sorted, totalSpend, perPerson, tripDays, topExpenses: topExpenseRows };
+  return { trip, memberCount, expenseCount, categoryTotals: sorted, totalSpend, perPerson, tripDays, dailyTimeline };
 });
 
 export async function generateMetadata({
@@ -90,7 +105,7 @@ export default async function SummaryPage({
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
 
-  const { trip, memberCount, expenseCount, categoryTotals, totalSpend, perPerson, tripDays, topExpenses } = data;
+  const { trip, memberCount, expenseCount, categoryTotals, totalSpend, perPerson, tripDays, dailyTimeline } = data;
   const currency = trip.defaultCurrency;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const shareUrl = `${appUrl}/summary/${token}`;
@@ -241,6 +256,7 @@ export default async function SummaryPage({
           <NarrativeSection
             tripName={trip.name}
             description={trip.description ?? null}
+            itinerary={trip.itinerary ?? null}
             startDate={trip.startDate ?? null}
             endDate={trip.endDate ?? null}
             tripDays={tripDays}
@@ -252,7 +268,7 @@ export default async function SummaryPage({
               total: c.total,
               pct: totalSpend > 0 ? Math.round((c.total / totalSpend) * 100) : 0,
             }))}
-            topExpenses={topExpenses}
+            dailyTimeline={dailyTimeline}
           />
         )}
 

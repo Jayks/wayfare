@@ -18,7 +18,7 @@ export async function createTrip(input: CreateTripInput) {
   const parsed = createTripSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.errors[0]?.message ?? "Invalid input" } as const;
 
-  const { name, description, coverPhotoUrl, defaultCurrency, startDate, endDate, budget } = parsed.data;
+  const { name, description, coverPhotoUrl, defaultCurrency, startDate, endDate, budget, itinerary } = parsed.data;
 
   try {
     const [trip] = await db.insert(trips).values({
@@ -29,6 +29,7 @@ export async function createTrip(input: CreateTripInput) {
       startDate: startDate || null,
       endDate: endDate || null,
       budget: budget != null ? String(budget) : null,
+      itinerary: itinerary || null,
       createdBy: user.id,
     }).returning();
 
@@ -58,7 +59,7 @@ export async function updateTrip(tripId: string, input: CreateTripInput) {
   if (!membership || membership.role !== "admin")
     return { ok: false, error: "Not authorized" } as const;
 
-  const { name, description, coverPhotoUrl, defaultCurrency, startDate, endDate, budget } = parsed.data;
+  const { name, description, coverPhotoUrl, defaultCurrency, startDate, endDate, budget, itinerary } = parsed.data;
 
   try {
     await db.update(trips).set({
@@ -69,6 +70,7 @@ export async function updateTrip(tripId: string, input: CreateTripInput) {
       startDate: startDate || null,
       endDate: endDate || null,
       budget: budget != null ? String(budget) : null,
+      itinerary: itinerary || null,
     }).where(eq(trips.id, tripId));
 
     revalidatePath(`/trips/${tripId}`);

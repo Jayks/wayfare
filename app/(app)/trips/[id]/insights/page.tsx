@@ -15,6 +15,7 @@ import { CategoryDonut } from "@/components/insights/category-donut";
 import { DailySpendBar } from "@/components/insights/daily-spend-bar";
 import { MemberContributions } from "@/components/insights/member-contributions";
 import { ArrowLeft, BarChart2 } from "lucide-react";
+import { AdherenceCard } from "@/components/trip/adherence-card";
 import Link from "next/link";
 
 export default async function TripInsightsPage({
@@ -131,6 +132,17 @@ export default async function TripInsightsPage({
       {/* Cross-trip comparison — only when user has other trips */}
       {crossTripInsights.length > 0 && (
         <CrossTripCard insights={crossTripInsights} />
+      )}
+
+      {/* Plan vs Reality — only when trip has an itinerary */}
+      {trip.itinerary && (
+        <AdherenceCard
+          itinerary={trip.itinerary}
+          expenses={expensesWithSplits.map(({ expense }) => ({
+            description: expense.description,
+            expenseDate: expense.expenseDate,
+          }))}
+        />
       )}
 
       {/* Smart insights */}

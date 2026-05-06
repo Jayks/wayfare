@@ -2,10 +2,17 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { getCategory } from "@/lib/categories";
+import { format, parseISO } from "date-fns";
+
+export interface DayEntry {
+  date: string; // YYYY-MM-DD
+  entries: { description: string; category: string }[];
+}
 
 interface NarrativeInput {
   tripName: string;
   description: string | null;
+  itinerary: string | null;
   startDate: string | null;
   endDate: string | null;
   tripDays: number;
@@ -13,7 +20,7 @@ interface NarrativeInput {
   totalSpend: number;
   currency: string;
   categoryBreakdown: { category: string; total: number; pct: number }[];
-  topExpenses: { description: string; amount: number }[];
+  dailyTimeline: DayEntry[];
 }
 
 export async function generateTripNarrative(
@@ -44,32 +51,39 @@ export async function generateTripNarrative(
     .map((c) => `  - ${getCategory(c.category).label}: ${fmt(c.total)} (${c.pct}%)`)
     .join("\n");
 
-  const topExpenseLines = input.topExpenses
-    .slice(0, 5)
-    .map((e) => `  - ${e.description}: ${fmt(e.amount)}`)
-    .join("\n");
+  // Build chronological day-by-day activity log
+  const timelineLines = input.dailyTimeline
+    .map((day, i) => {
+      const label = (() => {
+        try { return format(parseISO(day.date), "MMM d"); } catch { return day.date; }
+      })();
+      const dayNum = i + 1;
+      const items = day.entries.map((e) => `  • ${e.description} [${getCategory(e.category).label}]`).join("\n");
+      return `${label} (Day ${dayNum}):\n${items}`;
+    })
+    .join("\n\n");
 
-  const prompt = `Write a warm, vivid 2–3 paragraph travel narrative for a group trip. Use third person ("the group", "the travelers", "they"). Write like a travel magazine — evocative, human, memorable. Focus on the journey's spirit, the shared experiences, and what made it special. Do not list expenses or mention money unless it adds flavour (e.g. a splurge or a bargain). End on a warm, reflective note.
+  const prompt = `Write a warm, vivid 2–3 paragraph travel narrative for a group trip. Use third person ("the group", "the travelers", "they"). Write like a travel magazine — evocative, human, and memorable. Weave the actual activities and places from the day-by-day log into the story naturally. If a trip plan is provided, use it as the backbone and let the expense activities fill in the texture. Focus on the spirit of the journey, the shared experiences, and what made it special. Do not list expenses or mention money unless it adds flavour. End on a warm, reflective note.
 
 Trip: ${input.tripName}
 ${input.description ? `Description: ${input.description}\n` : ""}Duration: ${dateRange}
 Group size: ${input.memberCount} travelers
 Total spent: ${fmt(input.totalSpend)} (${fmt(Math.round(input.totalSpend / input.memberCount))} per person)
-
+${input.itinerary ? `\nTrip plan / itinerary:\n${input.itinerary}\n` : ""}
 Spending breakdown:
 ${categoryLines}
 
-Highlight expenses:
-${topExpenseLines}`;
+Day-by-day activities (from expenses):
+${timelineLines}`;
 
   try {
     const response = await Promise.race([
       client.messages.create({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 512,
+        max_tokens: 600,
         messages: [{ role: "user", content: prompt }],
       }),
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), 10000)),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 12000)),
     ]);
 
     if (!response) return { ok: false, error: "Request timed out. Please try again." };

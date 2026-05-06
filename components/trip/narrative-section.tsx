@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { Sparkles, Loader2, RefreshCw } from "lucide-react";
-import { generateTripNarrative } from "@/app/actions/narrative";
+import { generateTripNarrative, type DayEntry } from "@/app/actions/narrative";
 
 interface Props {
   tripName: string;
   description: string | null;
+  itinerary: string | null;
   startDate: string | null;
   endDate: string | null;
   tripDays: number;
@@ -14,7 +15,7 @@ interface Props {
   totalSpend: number;
   currency: string;
   categoryBreakdown: { category: string; total: number; pct: number }[];
-  topExpenses: { description: string; amount: number }[];
+  dailyTimeline: DayEntry[];
 }
 
 export function NarrativeSection(props: Props) {

@@ -11,6 +11,7 @@ export const trips = pgTable("trips", {
   endDate: date("end_date"),
   createdBy: uuid("created_by").notNull(),
   budget: numeric("budget", { precision: 12, scale: 2 }),
+  itinerary: text("itinerary"),
   isArchived: boolean("is_archived").notNull().default(false),
   shareToken: uuid("share_token").notNull().unique().default(sql`gen_random_uuid()`),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),

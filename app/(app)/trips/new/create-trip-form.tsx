@@ -78,6 +78,19 @@ export function CreateTripForm() {
         />
       </div>
 
+      {/* Itinerary */}
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1.5">
+          Trip plan <span className="text-slate-400 font-normal text-xs">(optional — helps AI write your trip story)</span>
+        </label>
+        <textarea
+          {...register("itinerary")}
+          rows={4}
+          placeholder={"Day 1: Arrive Chennai, check in\nDay 2: Mahabalipuram – Shore Temple, beach\nDay 3: Kanchipuram temples\n..."}
+          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder:text-slate-400 resize-none"
+        />
+      </div>
+
       {/* Dates */}
       <div className="grid grid-cols-2 gap-3">
         <div>
