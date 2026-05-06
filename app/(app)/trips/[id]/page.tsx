@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getTripWithMembers } from "@/lib/db/queries/trips";
 import { getTripName } from "@/lib/db/queries/meta";
 import { getExpenses } from "@/lib/db/queries/expenses";
-import { ArrowLeft, Users, Receipt, Wallet, Share2, BarChart2, Pencil } from "lucide-react";
+import { ArrowLeft, Users, Receipt, Wallet, Share2, BarChart2, Pencil, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { BudgetBar } from "@/components/trip/budget-bar";
@@ -137,6 +137,21 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
           </div>
         </Link>
       </div>
+
+      {/* Trip summary */}
+      <Link
+        href={`/summary/${trip.shareToken}`}
+        className="glass rounded-xl p-4 flex items-center gap-3 mb-6 hover:shadow-lg hover:shadow-cyan-500/10 transition-all group"
+      >
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-sm shrink-0">
+          <Sparkles className="w-4 h-4 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-slate-700">Trip Summary</p>
+          <p className="text-xs text-slate-500">View and share your trip story</p>
+        </div>
+        <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-500 transition-colors shrink-0" />
+      </Link>
 
       {/* Budget bar */}
       {trip.budget && (

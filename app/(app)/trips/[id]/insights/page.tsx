@@ -1,9 +1,15 @@
 import { notFound } from "next/navigation";
 import { getTripWithMembers } from "@/lib/db/queries/trips";
 import { getTripExpensesWithSplits } from "@/lib/db/queries/expenses";
+import { getOtherTripsSummary } from "@/lib/db/queries/insights";
 import { computeTripInsights } from "@/lib/insights/trip-insights";
+import { computeGroupRoles } from "@/lib/insights/group-roles";
+import { computeSpendTrajectory, computeCrossTripInsights } from "@/lib/insights/cross-trip";
 import { KpiCard } from "@/components/insights/kpi-card";
 import { SmartInsightCard } from "@/components/insights/smart-insight-card";
+import { GroupRolesCard } from "@/components/insights/group-roles-card";
+import { PaceTrackerCard } from "@/components/insights/pace-tracker-card";
+import { CrossTripCard } from "@/components/insights/cross-trip-card";
 import { AnimatedList } from "@/components/shared/animated-list";
 import { CategoryDonut } from "@/components/insights/category-donut";
 import { DailySpendBar } from "@/components/insights/daily-spend-bar";
@@ -17,15 +23,39 @@ export default async function TripInsightsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [tripData, expensesWithSplits] = await Promise.all([
+  const [tripData, expensesWithSplits, otherTrips] = await Promise.all([
     getTripWithMembers(id),
     getTripExpensesWithSplits(id),
+    getOtherTripsSummary(id),
   ]);
   if (!tripData) notFound();
 
   const { trip, members } = tripData;
   const insights = computeTripInsights({ trip, members, expensesWithSplits });
+  const groupRoles = computeGroupRoles({ members, expensesWithSplits });
   const currency = trip.defaultCurrency;
+
+  const trajectory = computeSpendTrajectory({
+    totalSpend: insights.totalSpend,
+    startDate: trip.startDate,
+    endDate: trip.endDate,
+    budget: trip.budget ? Number(trip.budget) : null,
+  });
+
+  const crossTripInsights = computeCrossTripInsights({
+    current: {
+      totalSpend: insights.totalSpend,
+      memberCount: members.length,
+      tripDays: insights.tripDays,
+      currency,
+      topCategory: insights.topCategory?.category ?? null,
+      topCategoryPct: insights.topCategory?.percentage ?? 0,
+      perPersonDaily: insights.tripDays > 0
+        ? Math.round(insights.perPerson / insights.tripDays)
+        : 0,
+    },
+    others: otherTrips,
+  });
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
@@ -77,16 +107,31 @@ export default async function TripInsightsPage({
           sub={`over ${insights.tripDays} day${insights.tripDays > 1 ? "s" : ""}`} />
       </div>
 
+      {/* Pace tracker — only when trip has start date */}
+      {trajectory && (
+        <PaceTrackerCard data={trajectory} currency={currency} />
+      )}
+
       {/* Charts row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <CategoryDonut data={insights.byCategory} currency={currency} />
         <DailySpendBar data={insights.byDay} currency={currency} />
       </div>
 
-      {/* Member contributions (full width) */}
+      {/* Member contributions */}
       <div className="mb-6">
         <MemberContributions data={insights.byMember} currency={currency} />
       </div>
+
+      {/* Group dynamics */}
+      <div className="mb-6">
+        <GroupRolesCard data={groupRoles} />
+      </div>
+
+      {/* Cross-trip comparison — only when user has other trips */}
+      {crossTripInsights.length > 0 && (
+        <CrossTripCard insights={crossTripInsights} />
+      )}
 
       {/* Smart insights */}
       <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
