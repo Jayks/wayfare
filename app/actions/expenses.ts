@@ -66,7 +66,7 @@ export async function addExpense(input: AddExpenseInput) {
       }))
     );
 
-    revalidatePath(`/trips/${tripId}/expenses`);
+    revalidatePath(`/trips/${tripId}`, "layout");
     return { ok: true, expenseId: expense.id } as const;
   } catch {
     return { ok: false, error: "Failed to add expense" } as const;
@@ -122,7 +122,7 @@ export async function updateExpense(expenseId: string, input: AddExpenseInput) {
       }))
     );
 
-    revalidatePath(`/trips/${tripId}/expenses`);
+    revalidatePath(`/trips/${tripId}`, "layout");
     return { ok: true } as const;
   } catch {
     return { ok: false, error: "Failed to update expense" } as const;
@@ -194,7 +194,7 @@ export async function deleteExpense(expenseId: string, tripId: string) {
 
   try {
     await db.delete(expenses).where(eq(expenses.id, expenseId));
-    revalidatePath(`/trips/${tripId}/expenses`);
+    revalidatePath(`/trips/${tripId}`, "layout");
     return { ok: true } as const;
   } catch {
     return { ok: false, error: "Failed to delete expense" } as const;

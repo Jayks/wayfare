@@ -33,6 +33,24 @@ export function extractDisplayName(user: {
   return typeof fullName === "string" ? fullName : user.email?.split("@")[0] ?? null;
 }
 
+/**
+ * Returns the best default expense date when none was parsed from user input.
+ * - Trip ongoing  → today
+ * - Trip not yet started → trip start date
+ * - Trip finished → trip start date (retroactive logging)
+ * - No trip dates → today
+ */
+export function smartDefaultDate(
+  tripStartDate?: string | null,
+  tripEndDate?: string | null
+): string {
+  const today = new Date().toISOString().split("T")[0];
+  if (!tripStartDate) return today;
+  if (today < tripStartDate) return tripStartDate;           // trip hasn't started
+  if (tripEndDate && today > tripEndDate) return tripStartDate; // trip is over
+  return today;                                               // trip is ongoing
+}
+
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat("en-IN", {

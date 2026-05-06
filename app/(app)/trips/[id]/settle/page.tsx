@@ -16,6 +16,7 @@ import Link from "next/link";
 import { MemberDebtBreakdown } from "@/components/settlement/member-debt-breakdown";
 import { formatCurrency, formatDate, getMemberName } from "@/lib/utils";
 import { MarkPaidButton } from "./mark-paid-button";
+import { UpiPayButton } from "./upi-pay-button";
 import { SettlementBreakdown } from "@/components/settlement/settlement-breakdown";
 
 export default async function SettlePage({ params }: { params: Promise<{ id: string }> }) {
@@ -118,6 +119,13 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
                 style={{ fontFamily: "var(--font-fraunces)" }}>
                 {formatCurrency(s.amount, trip.defaultCurrency)}
               </span>
+              {currentMember?.id === s.from && (
+                <UpiPayButton
+                  amount={s.amount}
+                  currency={trip.defaultCurrency}
+                  toName={memberName(s.to)}
+                />
+              )}
               <MarkPaidButton
                 tripId={id}
                 fromMemberId={s.from}

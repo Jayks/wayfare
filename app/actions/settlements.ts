@@ -38,7 +38,7 @@ export async function recordSettlement(input: RecordSettlementInput) {
       note: note || null,
     });
 
-    revalidatePath(`/trips/${tripId}/settle`);
+    revalidatePath(`/trips/${tripId}`, "layout");
     return { ok: true } as const;
   } catch {
     return { ok: false, error: "Failed to record settlement" } as const;
@@ -58,7 +58,7 @@ export async function deleteSettlement(settlementId: string, tripId: string) {
     await db.delete(settlements).where(
       and(eq(settlements.id, settlementId), eq(settlements.tripId, tripId))
     );
-    revalidatePath(`/trips/${tripId}/settle`);
+    revalidatePath(`/trips/${tripId}`, "layout");
     return { ok: true } as const;
   } catch {
     return { ok: false, error: "Failed to delete settlement" } as const;

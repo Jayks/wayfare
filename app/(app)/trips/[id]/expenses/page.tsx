@@ -6,6 +6,7 @@ import { ArrowLeft, Plus, Receipt, Download } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ExpenseFilters } from "@/components/expense/expense-filters";
+import { ChatImportDialog } from "@/components/expense/chat-import-dialog";
 import { formatCurrency } from "@/lib/utils";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -40,6 +41,14 @@ export default async function ExpensesPage({ params }: { params: Promise<{ id: s
         <h1 className="text-2xl text-slate-800 flex-1" style={{ fontFamily: "var(--font-fraunces)" }}>
           Expenses
         </h1>
+        <ChatImportDialog
+          tripId={id}
+          members={members}
+          currency={trip.defaultCurrency}
+          defaultMemberId={currentMember?.id ?? members[0]?.id ?? ""}
+          tripStartDate={trip.startDate ?? null}
+          tripEndDate={trip.endDate ?? null}
+        />
         {expenses.length > 0 && (
           <a
             href={`/api/trips/${id}/export`}

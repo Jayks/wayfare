@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useWarnBeforeLeave } from "@/hooks/use-warn-before-leave";
 import type { Trip } from "@/lib/db/schema/trips";
 import type { TripMember } from "@/lib/db/schema/trip-members";
-import { getMemberName } from "@/lib/utils";
+import { getMemberName, smartDefaultDate } from "@/lib/utils";
 import type { SplitMode, SplitInput } from "@/lib/splits/compute";
 import type { ParsedExpense } from "@/lib/parser/parse-expense";
 
@@ -42,7 +42,7 @@ export function AddExpenseForm({ trip, members }: Props) {
     defaultValues: {
       tripId: trip.id,
       currency: trip.defaultCurrency,
-      expenseDate: new Date().toISOString().split("T")[0],
+      expenseDate: smartDefaultDate(trip.startDate, trip.endDate),
       category: "other",
       paidByMemberId: members[0]?.id ?? "",
       splitMode: "equal",
@@ -69,7 +69,7 @@ export function AddExpenseForm({ trip, members }: Props) {
     if (parsed.description) setValue("description", parsed.description);
     if (parsed.amount !== null) setValue("amount", parsed.amount);
     if (parsed.paidByMemberId) setValue("paidByMemberId", parsed.paidByMemberId);
-    if (parsed.expenseDate) setValue("expenseDate", parsed.expenseDate);
+    setValue("expenseDate", parsed.expenseDate ?? smartDefaultDate(trip.startDate, trip.endDate));
     setValue("category", parsed.category);
 
     let nextIds: Set<string>;
