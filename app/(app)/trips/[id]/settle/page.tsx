@@ -17,6 +17,7 @@ import { MemberDebtBreakdown } from "@/components/settlement/member-debt-breakdo
 import { formatCurrency, formatDate, getMemberName } from "@/lib/utils";
 import { MarkPaidButton } from "./mark-paid-button";
 import { UpiPayButton } from "./upi-pay-button";
+import { WhatsAppRemindButton } from "./whatsapp-remind-button";
 import { SettlementBreakdown } from "@/components/settlement/settlement-breakdown";
 
 export default async function SettlePage({ params }: { params: Promise<{ id: string }> }) {
@@ -32,6 +33,8 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
   const { trip, members, currentMember } = data;
   const isAdmin = currentMember?.role === "admin";
   const pastSettlementsTotal = settlementHistory.reduce((sum, s) => sum + Number(s.amount), 0);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const settleUrl = `${appUrl}/trips/${id}/settle`;
 
   const memberName = (memberId: string) => {
     const m = members.find((m) => m.id === memberId);
@@ -124,6 +127,14 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
                   amount={s.amount}
                   currency={trip.defaultCurrency}
                   toName={memberName(s.to)}
+                />
+              )}
+              {currentMember?.id === s.to && (
+                <WhatsAppRemindButton
+                  fromName={memberName(s.from)}
+                  amount={formatCurrency(s.amount, trip.defaultCurrency)}
+                  tripName={trip.name}
+                  settleUrl={settleUrl}
                 />
               )}
               <MarkPaidButton
