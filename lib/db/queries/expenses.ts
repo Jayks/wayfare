@@ -68,8 +68,15 @@ export async function getTripExpensesWithSplits(tripId: string) {
     .from(expenseSplits)
     .where(inArray(expenseSplits.expenseId, tripExpenses.map((e) => e.id)));
 
+  const splitsByExpense = new Map<string, typeof splits>();
+  for (const s of splits) {
+    const arr = splitsByExpense.get(s.expenseId) ?? [];
+    arr.push(s);
+    splitsByExpense.set(s.expenseId, arr);
+  }
+
   return tripExpenses.map((expense) => ({
     expense,
-    splits: splits.filter((s) => s.expenseId === expense.id),
+    splits: splitsByExpense.get(expense.id) ?? [],
   }));
 }

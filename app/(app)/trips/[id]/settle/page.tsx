@@ -20,15 +20,15 @@ import { SettlementBreakdown } from "@/components/settlement/settlement-breakdow
 
 export default async function SettlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [data, settlementHistory, expensesWithSplits] = await Promise.all([
+  const [data, settlementHistory, expensesWithSplits, { balances, suggestions }] = await Promise.all([
     getTripWithMembers(id),
     getSettlements(id),
     getTripExpensesWithSplits(id),
+    getBalances(id),
   ]);
   if (!data) notFound();
 
   const { trip, members, currentMember } = data;
-  const { balances, suggestions } = await getBalances(id);
   const isAdmin = currentMember?.role === "admin";
   const pastSettlementsTotal = settlementHistory.reduce((sum, s) => sum + Number(s.amount), 0);
 

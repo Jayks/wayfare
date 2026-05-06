@@ -43,7 +43,7 @@ export default async function TripsPage() {
       ) : (
         <>
           {trips.length > 0 && (
-            <AnimatedList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatedList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {trips.map(({ trip, memberCount }) => (
                 <TripCard key={trip.id} trip={trip} memberCount={Number(memberCount)} />
               ))}
@@ -55,7 +55,7 @@ export default async function TripsPage() {
               <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4 flex items-center gap-2">
                 <Archive className="w-4 h-4" /> Archived
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 opacity-60">
                 {archived.map(({ trip, memberCount }) => (
                   <TripCard key={trip.id} trip={trip} memberCount={Number(memberCount)} />
                 ))}

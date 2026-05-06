@@ -62,7 +62,7 @@ export default async function TripInsightsPage({
 
   if (expensesWithSplits.length === 0) {
     return (
-      <div className="max-w-3xl">
+      <div className="max-w-5xl">
         <Link href={`/trips/${id}`}
           className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back
@@ -79,7 +79,7 @@ export default async function TripInsightsPage({
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-5xl">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href={`/trips/${id}`}

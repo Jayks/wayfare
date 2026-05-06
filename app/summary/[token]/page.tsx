@@ -4,16 +4,19 @@ import { trips } from "@/lib/db/schema/trips";
 import { tripMembers } from "@/lib/db/schema/trip-members";
 import { expenses } from "@/lib/db/schema/expenses";
 import { eq, sql, desc } from "drizzle-orm";
+import { cache } from "react";
+import { createClient } from "@/lib/supabase/server";
 import { differenceInDays, parseISO } from "date-fns";
 import { formatDate } from "@/lib/utils";
 import { getCategory, CATEGORY_HEX } from "@/lib/categories";
 import { SummaryShareButton } from "@/components/trip/summary-share-button";
 import { NarrativeSection } from "@/components/trip/narrative-section";
 import Link from "next/link";
+import Image from "next/image";
 import { Compass } from "lucide-react";
 import type { Metadata } from "next";
 
-async function getSummaryData(token: string) {
+const getSummaryData = cache(async function getSummaryData(token: string) {
   const [trip] = await db.select().from(trips).where(eq(trips.shareToken, token));
   if (!trip) return null;
 
@@ -51,7 +54,7 @@ async function getSummaryData(token: string) {
   }
 
   return { trip, memberCount, expenseCount, categoryTotals: sorted, totalSpend, perPerson, tripDays, topExpenses: topExpenseRows };
-}
+});
 
 export async function generateMetadata({
   params,
@@ -78,8 +81,14 @@ export default async function SummaryPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  const data = await getSummaryData(token);
+  const [data, supabase] = await Promise.all([
+    getSummaryData(token),
+    createClient(),
+  ]);
   if (!data) notFound();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
 
   const { trip, memberCount, expenseCount, categoryTotals, totalSpend, perPerson, tripDays, topExpenses } = data;
   const currency = trip.defaultCurrency;
@@ -106,12 +115,21 @@ export default async function SummaryPage({
             Wayfare
           </span>
         </Link>
-        <Link
-          href="/"
-          className="text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
-        >
-          Try Wayfare →
-        </Link>
+        {isLoggedIn ? (
+          <Link
+            href="/trips"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
+          >
+            ← My trips
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 px-4 py-1.5 rounded-xl transition-all shadow-sm shadow-cyan-500/20"
+          >
+            Get started →
+          </Link>
+        )}
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
@@ -120,8 +138,14 @@ export default async function SummaryPage({
         <div className="glass rounded-3xl overflow-hidden mb-6 shadow-xl shadow-slate-200/60">
           <div className="h-64 relative">
             {trip.coverPhotoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={trip.coverPhotoUrl} alt={trip.name} className="w-full h-full object-cover" />
+              <Image
+                src={trip.coverPhotoUrl}
+                alt={trip.name}
+                fill
+                sizes="(max-width: 672px) 100vw, 672px"
+                className="object-cover"
+                priority
+              />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-teal-500" />
             )}

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/shared/skeleton";
 
 export default function AllInsightsLoading() {
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-5xl">
       <div className="mb-6 space-y-2">
         <Skeleton className="h-9 w-52" />
         <Skeleton className="h-4 w-32" />

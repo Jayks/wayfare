@@ -55,7 +55,9 @@ export async function deleteSettlement(settlementId: string, tripId: string) {
     return { ok: false, error: "Not authorized" } as const;
 
   try {
-    await db.delete(settlements).where(eq(settlements.id, settlementId));
+    await db.delete(settlements).where(
+      and(eq(settlements.id, settlementId), eq(settlements.tripId, tripId))
+    );
     revalidatePath(`/trips/${tripId}/settle`);
     return { ok: true } as const;
   } catch {

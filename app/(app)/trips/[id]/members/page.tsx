@@ -8,6 +8,7 @@ import { MemberAvatar } from "@/components/shared/member-avatar";
 import { getMemberName } from "@/lib/utils";
 import { AddGuestForm } from "./add-guest-form";
 import { QRInvite } from "@/components/trip/qr-invite";
+import { ShareButton } from "../share-button";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -89,17 +90,17 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
       {/* Invite link */}
       {isAdmin && (
         <div className="glass rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-slate-700 mb-1">Invite link</h2>
-          <p className="text-xs text-slate-500 mb-3">Anyone with this link can join the trip.</p>
-          <div className="flex items-center gap-2 bg-white/50 border border-slate-200 rounded-xl px-3 py-2 mb-3">
-            <p className="text-xs text-slate-600 truncate flex-1">{inviteUrl}</p>
-          </div>
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <RegenerateTokenButton tripId={trip.id} inviteUrl={inviteUrl} />
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-700">Invite to trip</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Anyone with this link can join.</p>
             </div>
-            <QRInvite url={inviteUrl} />
+            <div className="flex items-center gap-2">
+              <ShareButton url={inviteUrl} tripName={trip.name} />
+              <QRInvite url={inviteUrl} />
+            </div>
           </div>
+          <RegenerateTokenButton tripId={trip.id} inviteUrl={inviteUrl} />
         </div>
       )}
     </div>

@@ -64,7 +64,7 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
     },
   });
 
-  const amount = parseFloat(watch("amount") as unknown as string) || 0;
+  const amount = Number(watch("amount")) || 0;
   const currency = watch("currency");
   const category = watch("category");
 

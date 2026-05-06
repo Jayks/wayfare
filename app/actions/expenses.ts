@@ -185,7 +185,7 @@ export async function deleteExpense(expenseId: string, tripId: string) {
   if (!user) return { ok: false, error: "Not authenticated" } as const;
 
   const [expense] = await db.select().from(expenses).where(eq(expenses.id, expenseId));
-  if (!expense) return { ok: false, error: "Not found" } as const;
+  if (!expense || expense.tripId !== tripId) return { ok: false, error: "Not found" } as const;
 
   const membership = await getMembership(tripId, user.id);
   if (!membership) return { ok: false, error: "Not a member" } as const;

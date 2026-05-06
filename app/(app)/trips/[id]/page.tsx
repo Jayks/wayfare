@@ -4,6 +4,7 @@ import { getTripName } from "@/lib/db/queries/meta";
 import { getExpenses } from "@/lib/db/queries/expenses";
 import { ArrowLeft, Users, Receipt, Wallet, BarChart2, Pencil, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { formatDate } from "@/lib/utils";
 import { BudgetBar } from "@/components/trip/budget-bar";
 import { ArchiveButton } from "./archive-button";
@@ -16,6 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: name ? `${name} | Wayfare` : "Wayfare" };
 }
 import { ShareButton } from "./share-button";
+import { RegenerateTokenButton } from "./members/regenerate-token-button";
 
 export default async function TripPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -57,8 +59,14 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
       <div className="glass rounded-2xl overflow-hidden mb-6">
         <div className="h-52 relative">
           {trip.coverPhotoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={trip.coverPhotoUrl} alt={trip.name} className="w-full h-full object-cover" />
+            <Image
+              src={trip.coverPhotoUrl}
+              alt={trip.name}
+              fill
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              className="object-cover"
+              priority
+            />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-teal-500" />
           )}
@@ -166,15 +174,18 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
 
       {/* Invite link */}
       {isAdmin && (
-        <div className="glass rounded-xl p-4 flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm font-medium text-slate-700">Invite to trip</p>
-            <p className="text-xs text-slate-500">Share with your group</p>
+        <div className="glass rounded-xl p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-sm font-medium text-slate-700">Invite to trip</p>
+              <p className="text-xs text-slate-500">Share with your group</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShareButton url={inviteUrl} tripName={trip.name} />
+              <QRInvite url={inviteUrl} />
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <ShareButton url={inviteUrl} tripName={trip.name} />
-            <QRInvite url={inviteUrl} />
-          </div>
+          <RegenerateTokenButton tripId={trip.id} inviteUrl={inviteUrl} />
         </div>
       )}
 

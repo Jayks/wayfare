@@ -31,7 +31,7 @@ export default async function AllInsightsPage() {
     new Intl.NumberFormat("en-IN", { style: "currency", currency: primaryCurrency, maximumFractionDigits: 0 }).format(n);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-5xl">
       <div className="mb-6">
         <h1 className="text-3xl text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>
           Your travel story

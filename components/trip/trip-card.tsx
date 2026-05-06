@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Users } from "lucide-react";
 import type { Trip } from "@/lib/db/schema/trips";
 import { formatDate } from "@/lib/utils";
@@ -19,11 +20,12 @@ export function TripCard({ trip, memberCount }: TripCardProps) {
       <Link href={`/trips/${trip.id}`} className="block">
         <div className="h-44 relative">
           {trip.coverPhotoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={trip.coverPhotoUrl}
               alt={trip.name}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              className="object-cover"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-teal-500" />

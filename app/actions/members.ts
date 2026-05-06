@@ -52,7 +52,9 @@ export async function removeMember(tripId: string, memberId: string) {
     return { ok: false, error: "Not authorized" } as const;
 
   try {
-    await db.delete(tripMembers).where(eq(tripMembers.id, memberId));
+    await db.delete(tripMembers).where(
+      and(eq(tripMembers.id, memberId), eq(tripMembers.tripId, tripId))
+    );
     revalidatePath(`/trips/${tripId}/members`);
     return { ok: true } as const;
   } catch {

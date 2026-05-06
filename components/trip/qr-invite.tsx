@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
+import dynamic from "next/dynamic";
+
+const QRCodeSVG = dynamic(
+  () => import("qrcode.react").then((m) => ({ default: m.QRCodeSVG })),
+  { ssr: false, loading: () => <div className="w-[200px] h-[200px] rounded-xl bg-slate-100 animate-pulse" /> }
+);
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { QrCode } from "lucide-react";
 import { toast } from "sonner";

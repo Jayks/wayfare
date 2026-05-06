@@ -42,7 +42,7 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
 
   return (
     <header className="sticky top-0 z-50 glass-nav">
-      <div className="max-w-5xl mx-auto px-6 md:px-8 h-14 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 h-14 flex items-center justify-between">
         {/* Logo */}
         <Link href="/trips" className="flex items-center gap-2 group shrink-0">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-sm shadow-cyan-500/30 group-hover:shadow-cyan-500/50 transition-shadow">

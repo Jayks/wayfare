@@ -3,8 +3,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { getCategory } from "@/lib/categories";
 
-const client = new Anthropic();
-
 interface NarrativeInput {
   tripName: string;
   description: string | null;
@@ -21,9 +19,12 @@ interface NarrativeInput {
 export async function generateTripNarrative(
   input: NarrativeInput
 ): Promise<{ ok: true; narrative: string } | { ok: false; error: string }> {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
     return { ok: false, error: "AI narrative generation is not configured." };
   }
+
+  const client = new Anthropic({ apiKey });
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-IN", {
