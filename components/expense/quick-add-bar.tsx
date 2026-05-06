@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Zap, X, Sparkles, Loader2, CalendarDays } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Zap, X, Sparkles, Loader2, CalendarDays, Mic, MicOff } from "lucide-react";
 import type { TripMember } from "@/lib/db/schema/trip-members";
 import type { ParsedExpense } from "@/lib/parser/parse-expense";
 import { parseExpenseText } from "@/lib/parser/parse-expense";
 import { parseExpenseWithAI } from "@/app/actions/parse-expense";
 import { getMemberName, formatCurrency, formatDate } from "@/lib/utils";
 import { getCategory } from "@/lib/categories";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 
 type ParseMode = "ai" | "basic";
 
@@ -25,26 +26,33 @@ export function QuickAddBar({ members, currency, tripStartDate, tripEndDate, onP
   const [loading, setLoading] = useState(false);
   const [parseMode, setParseMode] = useState<ParseMode | null>(null);
 
-  async function handleFill() {
-    if (!text.trim()) return;
+  const handleFill = useCallback(async (input?: string) => {
+    const value = (input ?? text).trim();
+    if (!value) return;
+    if (input) setText(input);
     setLoading(true);
 
     const memberContext = members.map((m) => ({ id: m.id, name: getMemberName(m) }));
     const today = new Date().toISOString().split("T")[0];
 
-    const aiResult = await parseExpenseWithAI(text, memberContext, {
+    const aiResult = await parseExpenseWithAI(value, memberContext, {
       today,
       tripStart: tripStartDate,
       tripEnd: tripEndDate,
     });
-    const result = aiResult ?? parseExpenseText(text, members);
+    const result = aiResult ?? parseExpenseText(value, members);
     const mode: ParseMode = aiResult ? "ai" : "basic";
 
     setParsed(result);
     setParseMode(mode);
     onParsed(result);
     setLoading(false);
-  }
+  }, [text, members, tripStartDate, tripEndDate, onParsed]);
+
+  const { isSupported: micSupported, isListening, interimTranscript, start, stop } =
+    useSpeechRecognition({
+      onFinal: (transcript) => handleFill(transcript),
+    });
 
   function handleClear() {
     setText("");
@@ -58,6 +66,8 @@ export function QuickAddBar({ members, currency, tripStartDate, tripEndDate, onP
       handleFill();
     }
   }
+
+  const displayText = isListening && interimTranscript ? interimTranscript : text;
 
   const payer = parsed?.paidByMemberId
     ? members.find((m) => m.id === parsed.paidByMemberId)
@@ -76,7 +86,7 @@ export function QuickAddBar({ members, currency, tripStartDate, tripEndDate, onP
           Quick add
         </span>
         <span className="text-xs text-slate-400 normal-case font-normal tracking-normal">
-          — type a short description and press Enter
+          — type or speak an expense
         </span>
 
         {parseMode === "ai" && (
@@ -95,18 +105,45 @@ export function QuickAddBar({ members, currency, tripStartDate, tripEndDate, onP
 
       {/* Input row */}
       <div className="flex gap-2">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={loading}
-          placeholder="dinner 2400 raj yesterday split 4"
-          className="flex-1 px-3 py-2 text-sm rounded-xl border border-cyan-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-400 disabled:opacity-60"
-        />
+        <div className="relative flex-1">
+          <input
+            value={displayText}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={loading || isListening}
+            placeholder={isListening ? "Listening…" : "dinner 2400 raj yesterday split 4"}
+            className="w-full px-3 py-2 text-sm rounded-xl border border-cyan-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-400 disabled:opacity-60 pr-10"
+          />
+          {/* Mic button — inside the input on the right */}
+          {micSupported && (
+            <button
+              type="button"
+              onClick={isListening ? stop : start}
+              disabled={loading}
+              title={isListening ? "Stop recording" : "Speak an expense"}
+              className={`absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors disabled:opacity-40 ${
+                isListening
+                  ? "text-red-500 hover:text-red-600"
+                  : "text-slate-400 hover:text-cyan-500"
+              }`}
+            >
+              {isListening ? (
+                <MicOff className="w-4 h-4" />
+              ) : (
+                <Mic className="w-4 h-4" />
+              )}
+              {/* Pulsing ring when listening */}
+              {isListening && (
+                <span className="absolute inset-0 rounded-full animate-ping bg-red-400 opacity-30" />
+              )}
+            </button>
+          )}
+        </div>
+
         <button
           type="button"
-          onClick={handleFill}
-          disabled={loading}
+          onClick={() => handleFill()}
+          disabled={loading || isListening}
           className="px-4 py-2 text-sm font-medium bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white rounded-xl transition-all disabled:opacity-60 flex items-center gap-1.5 whitespace-nowrap"
         >
           {loading ? (
@@ -119,6 +156,14 @@ export function QuickAddBar({ members, currency, tripStartDate, tripEndDate, onP
           )}
         </button>
       </div>
+
+      {/* Listening indicator */}
+      {isListening && (
+        <p className="mt-2 text-xs text-red-500 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
+          Recording — speak your expense, then tap the mic to stop
+        </p>
+      )}
 
       {/* Chips row */}
       {parsed && (
@@ -147,10 +192,12 @@ export function QuickAddBar({ members, currency, tripStartDate, tripEndDate, onP
           {showSplitChip && (
             <span className="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700 font-medium">
               {parsed.splitMemberIds && parsed.splitMemberIds.length > 0
-                ? `÷ ${parsed.splitMemberIds.map((id) => {
-                    const m = members.find((m) => m.id === id);
-                    return m ? getMemberName(m).split(" ")[0] : "?";
-                  }).join(", ")}`
+                ? `÷ ${parsed.splitMemberIds
+                    .map((id) => {
+                      const m = members.find((m) => m.id === id);
+                      return m ? getMemberName(m).split(" ")[0] : "?";
+                    })
+                    .join(", ")}`
                 : parsed.splitCount === null
                 ? "÷ all"
                 : `÷ ${parsed.splitCount}`}
