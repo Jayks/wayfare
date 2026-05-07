@@ -55,7 +55,7 @@ The name plays on *wayfarer* (a traveler) and *fare* (the cost of a journey).
 | Theme | **next-themes** | 0.4.x | Dark/light toggle — `ThemeProvider` in root layout, `ThemeToggle` in nav |
 | Deployment | **Vercel** | — | |
 
-**Additional dev tools**: `tsx` (run scripts), `dotenv` (drizzle.config env loading), `vitest` (unit tests).
+**Additional dev tools**: `tsx` (run scripts), `dotenv` (drizzle.config env loading), `vitest` (unit tests), `puppeteer-core` (screenshot automation + PDF generation for user manual).
 
 **Do NOT add**: NextAuth, Prisma, Redux, MUI, Chakra, Bootstrap, styled-components, tRPC, Pusher/Ably.
 
@@ -343,7 +343,7 @@ Dark mode is fully implemented via `next-themes` with `attribute="class"` on `<h
 
 ### Navigation
 
-- **Desktop**: Sticky top nav with logo, Trips + Insights links (active state: cyan pill), ThemeToggle, avatar dropdown
+- **Desktop**: Sticky top nav with logo, Trips + Insights links (active state: cyan pill), ThemeToggle, **Help link** (BookOpen → `/docs/wayfare-user-manual.html`, opens in new tab), avatar dropdown
 - **Mobile**: Fixed bottom nav (`MobileNav`) with Trips + Insights icons. Content gets `pb-24` on mobile.
 
 ---
@@ -540,9 +540,15 @@ wayfare/
 ├── scripts/
 │   ├── seed-test.ts                # pnpm seed — creates Goa trip, 10 members, 30 expenses
 │   ├── seed-temple-tour.ts         # pnpm seed:temple — South India temple circuit, 20 members, 24 expenses
-│   └── verify-seed.ts              # verifies seed data integrity
+│   ├── verify-seed.ts              # verifies seed data integrity
+│   ├── take-screenshots.js         # pnpm manual:screenshots — Puppeteer captures 16 app screenshots into public/docs/screenshots/
+│   └── generate-manual-pdf.js      # pnpm manual:pdf — renders HTML manual → docs/wayfare-user-manual.pdf (requires pnpm dev)
 ├── drizzle/
 │   └── policies.sql                # all RLS policies for all 5 tables
+├── public/
+│   └── docs/
+│       ├── wayfare-user-manual.html  # 10-section user manual (served at /docs/wayfare-user-manual.html)
+│       └── screenshots/              # 16 auto-captured PNG screenshots (committed — Vercel needs them)
 ├── drizzle.config.ts               # uses dotenv to load .env.local
 ├── proxy.ts                        # Next.js 16 proxy (was middleware.ts in v15)
 └── CLAUDE.md
@@ -626,12 +632,21 @@ alter publication supabase_realtime add table trip_members;
 - Trip narrative generator on the summary page (day-by-day timeline + itinerary → travel story)
 - Plan vs Reality adherence analysis on the insights page
 
+**Prompt injection hardening** (all four Claude actions):
+- User-supplied data (expense text, chat transcript, itinerary, trip name/description) is wrapped in XML tags (`<expense_text>`, `<chat_transcript>`, `<trip_plan>`, `<trip_data>`) in the `user` message turn
+- Member names/IDs moved out of `system` prompt into `user` turn inside `<members>` tags
+- Post-parse member ID cross-validation: returned `paidByMemberId` and `splitMemberIds` are filtered against the actual trip member set before use
+
 ### Settlement
 - UPI payment deep link (`upi://pay?...`) on the settle page — only shown on rows where the current user is the payer; inline UPI ID input → opens PhonePe/GPay/Paytm pre-filled
 - WhatsApp debt reminder — `wa.me/?text=...` link on rows where current user is payee; pre-filled message with amount and trip name
 
+### Documentation
+- **User manual** — 10-section HTML manual with 16 auto-captured screenshots served at `/docs/wayfare-user-manual.html`; PDF generated via `pnpm manual:pdf`; screenshots re-taken via `pnpm manual:screenshots` (requires `pnpm dev` running + fresh session cookies in `docs/cookies.json`)
+
 ### UX
 - **Dark mode** — full dark theme via next-themes; Sun/Moon toggle in nav and login/landing pages; persists to localStorage, defaults to OS preference
+- **Help link** — BookOpen icon in desktop nav links to user manual in new tab
 - Glassmorphic design: frosted cards, gradient blobs, cyan/teal palette
 - Mobile bottom nav + desktop top nav with active states
 - Loading skeletons (Next.js `loading.tsx`) on all major pages
@@ -724,6 +739,8 @@ pnpm db:push          # push Drizzle schema to Supabase
 pnpm db:studio        # Drizzle Studio (DB browser)
 pnpm seed             # seed test data (Goa trip, 10 members, 30 expenses)
 pnpm seed:temple      # seed South India temple tour (20 members, 24 expenses, current user as admin)
+pnpm manual:screenshots  # retake all 16 manual screenshots (requires pnpm dev + fresh docs/cookies.json)
+pnpm manual:pdf          # generate docs/wayfare-user-manual.pdf from public/docs/wayfare-user-manual.html
 ```
 
 ---
@@ -750,6 +767,7 @@ pnpm seed:temple      # seed South India temple tour (20 members, 24 expenses, c
 | 16 | AI quick-add expense parser — natural language → pre-filled form (Claude Haiku + rule-based fallback) | ✅ Done |
 | 17 | CSV export + AI trip narrative (Claude Haiku generates a travel story on the summary page) | ✅ Done |
 | 18 | Voice input (Web Speech API → AI parser); trip plan/itinerary field; richer narrative (day-by-day timeline); Plan vs Reality adherence card on insights page | ✅ Done |
+| 19 | User manual (10-section HTML + 16 screenshots at `/docs/wayfare-user-manual.html`); Help nav link; prompt injection hardening on all Claude actions | ✅ Done |
 
 ---
 
@@ -788,13 +806,11 @@ postgresql://postgres.[ref]:[password]@aws-1-ap-southeast-1.pooler.supabase.com:
 ## 18. What is OUT of scope (v1)
 
 - Email/push notifications
-- Receipt photo uploads (Phase 18 — planned)
-- Voice input (Phase 18 — planned)
-- PDF export (CSV export is done; PDF is not)
+- Receipt photo uploads
+- PDF export (CSV export is done; PDF generation script exists locally but PDF is not served)
 - Multi-currency FX within a trip
 - PWA / offline mode
 - Mobile app
-- Dark mode
 - Activity/audit log
 - Comments on expenses
 - Claim guest profile (v2 — schema already supports it via user_id on trip_members)
