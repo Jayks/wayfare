@@ -4,6 +4,7 @@ import {
   Compass, ArrowRight, Users, TrendingDown, CheckCircle2,
   MapPin, Receipt, Zap, Globe, DivideSquare,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 const HERO_IMAGE = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85";
 const MIDPAGE_IMAGE = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=85";
@@ -86,16 +87,17 @@ export default function LandingPage() {
               <Compass className="w-4 h-4 text-white" />
             </div>
             <span
-              className="text-lg font-semibold text-slate-800"
+              className="text-lg font-semibold text-slate-800 dark:text-slate-100"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
               Wayfare
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link
               href="/login"
-              className="hidden sm:block text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
+              className="hidden sm:block text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
             >
               Sign in
             </Link>
@@ -121,12 +123,20 @@ export default function LandingPage() {
             priority
             className="object-cover object-center"
           />
-          {/* Gradient overlay: near-opaque left (text readable) → semi-transparent right (photo shows through) */}
+          {/* Light mode overlay */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 dark:hidden"
             style={{
               background:
                 "linear-gradient(105deg, rgba(239,246,255,0.97) 0%, rgba(236,254,255,0.93) 28%, rgba(240,253,250,0.80) 55%, rgba(236,253,245,0.60) 80%, rgba(240,253,250,0.45) 100%)",
+            }}
+          />
+          {/* Dark mode overlay */}
+          <div
+            className="absolute inset-0 hidden dark:block"
+            style={{
+              background:
+                "linear-gradient(105deg, rgba(15,23,42,0.93) 0%, rgba(12,21,32,0.88) 28%, rgba(10,26,24,0.78) 55%, rgba(11,31,21,0.55) 80%, rgba(10,26,24,0.40) 100%)",
             }}
           />
         </div>
@@ -138,14 +148,14 @@ export default function LandingPage() {
           {/* Left — copy */}
           <div className="flex-1 text-center lg:text-left">
             {/* Live badge */}
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-sm font-medium text-slate-600 mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-200 mb-8 shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 animate-pulse shrink-0" />
               Group expense tracking · Free forever
             </div>
 
             {/* Headline */}
             <h1
-              className="text-5xl sm:text-6xl lg:text-[66px] xl:text-[72px] font-normal leading-[1.06] text-slate-800 mb-7"
+              className="text-5xl sm:text-6xl lg:text-[66px] xl:text-[72px] font-normal leading-[1.06] text-slate-800 dark:text-slate-100 mb-7"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
               Travel{" "}
@@ -163,10 +173,10 @@ export default function LandingPage() {
               Settle easy.
             </h1>
 
-            <p className="text-lg sm:text-xl text-slate-500 leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0">
+            <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0">
               Log every coffee, cab, and hotel room with your group.
               At the end of the trip, Wayfare figures out who pays whom — with the{" "}
-              <span className="text-slate-700 font-medium">fewest payments possible.</span>
+              <span className="text-slate-700 dark:text-slate-200 font-medium">fewest payments possible.</span>
             </p>
 
             {/* CTAs */}
@@ -180,7 +190,7 @@ export default function LandingPage() {
               </Link>
               <a
                 href="#how-it-works"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 glass text-slate-600 hover:text-slate-800 font-medium text-base py-3.5 px-9 rounded-2xl transition-all hover:shadow-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 glass text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium text-base py-3.5 px-9 rounded-2xl transition-all hover:shadow-md"
               >
                 How it works
               </a>
@@ -189,7 +199,7 @@ export default function LandingPage() {
             {/* Social trust */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2">
               {["Google sign-in", "No credit card", "Free forever"].map((t) => (
-                <span key={t} className="inline-flex items-center gap-1.5 text-sm text-slate-400">
+                <span key={t} className="inline-flex items-center gap-1.5 text-sm text-slate-400 dark:text-slate-300">
                   <CheckCircle2 className="w-3.5 h-3.5 text-teal-500 shrink-0" />
                   {t}
                 </span>
@@ -212,10 +222,10 @@ export default function LandingPage() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-semibold text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100" style={{ fontFamily: "var(--font-fraunces)" }}>
                     Goa Summer 2025
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">8 members · 30 expenses</p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-300 mt-0.5">8 members · 30 expenses</p>
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-400 flex items-center justify-center text-base shadow-sm shadow-cyan-500/20">
                   🏖️
@@ -226,15 +236,15 @@ export default function LandingPage() {
                 { icon: "🏨", desc: "Villa Nilaya", amount: "₹12,500", by: "Arjun", n: 8 },
                 { icon: "🚕", desc: "Airport taxi", amount: "₹1,800", by: "You", n: 4 },
               ].map((e, i) => (
-                <div key={i} className="flex items-center gap-3 py-2.5 border-b border-slate-100/80 last:border-0">
-                  <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-sm shrink-0">
+                <div key={i} className="flex items-center gap-3 py-2.5 border-b border-slate-100/80 dark:border-slate-700/40 last:border-0">
+                  <div className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-sm shrink-0">
                     {e.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-700 truncate">{e.desc}</p>
-                    <p className="text-[11px] text-slate-400">{e.by} · {e.n} splits</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">{e.desc}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-300">{e.by} · {e.n} splits</p>
                   </div>
-                  <p className="text-xs font-semibold text-slate-700 tabular shrink-0">{e.amount}</p>
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 tabular shrink-0">{e.amount}</p>
                 </div>
               ))}
             </div>
@@ -250,11 +260,11 @@ export default function LandingPage() {
                 boxShadow: "0 20px 60px rgba(8,145,178,0.18), 0 4px 16px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.9) inset",
               }}
             >
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-3">
                 Settle up
               </p>
-              <div className="mb-4 pb-4 border-b border-slate-100">
-                <p className="text-[11px] text-slate-400 mb-0.5">You are owed</p>
+              <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-700/50">
+                <p className="text-[11px] text-slate-400 dark:text-slate-300 mb-0.5">You are owed</p>
                 <p
                   className="text-[32px] font-semibold leading-none text-emerald-600 tabular"
                   style={{ fontFamily: "var(--font-fraunces)" }}
@@ -267,10 +277,10 @@ export default function LandingPage() {
                   { from: "Kavya", amount: "₹2,400" },
                   { from: "Raj", amount: "₹2,430" },
                 ].map((t, i) => (
-                  <div key={i} className="flex items-center justify-between bg-white/60 rounded-xl px-2.5 py-2">
+                  <div key={i} className="flex items-center justify-between bg-white/60 dark:bg-slate-800/60 rounded-xl px-2.5 py-2">
                     <div>
-                      <p className="text-[11px] text-slate-500">{t.from} → You</p>
-                      <p className="text-sm font-semibold text-slate-800 tabular">{t.amount}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">{t.from} → You</p>
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 tabular">{t.amount}</p>
                     </div>
                     <div
                       className="h-6 px-2 rounded-lg flex items-center justify-center shadow-sm shadow-cyan-500/20"
@@ -289,7 +299,7 @@ export default function LandingPage() {
               style={{ top: 0, right: 28, zIndex: 3, transform: "rotate(-1deg)" }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-[11px] font-semibold text-slate-700">₹1,24,500 tracked</span>
+              <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">₹1,24,500 tracked</span>
             </div>
           </div>
         </div>
@@ -297,11 +307,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── Scrolling ticker ──────────────────────────────────────────────── */}
-      <div className="py-5 overflow-hidden border-y border-white/60 bg-white/30 backdrop-blur-sm">
+      <div className="py-5 overflow-hidden border-y border-white/60 dark:border-slate-700/40 bg-white/30 dark:bg-slate-900/20 backdrop-blur-sm">
         <div className="flex gap-8 animate-none whitespace-nowrap">
           <div className="flex gap-8 shrink-0">
             {usedFor.concat(usedFor).map((label, i) => (
-              <span key={i} className="inline-flex items-center gap-2 text-sm font-medium text-slate-500">
+              <span key={i} className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
                 <Compass className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                 {label}
               </span>
@@ -315,12 +325,12 @@ export default function LandingPage() {
         <div className="text-center mb-14">
           <p className="text-sm font-semibold text-cyan-600 uppercase tracking-widest mb-3">Features</p>
           <h2
-            className="text-4xl sm:text-5xl text-slate-800 mb-4"
+            className="text-4xl sm:text-5xl text-slate-800 dark:text-slate-100 mb-4"
             style={{ fontFamily: "var(--font-fraunces)" }}
           >
             Everything your group needs
           </h2>
-          <p className="text-lg text-slate-500 max-w-xl mx-auto">
+          <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
             Built specifically for trips — not generic bill-splitting.
           </p>
         </div>
@@ -337,12 +347,12 @@ export default function LandingPage() {
                 <f.icon className="w-5.5 h-5.5 text-white" />
               </div>
               <h3
-                className="text-xl text-slate-800 mb-3"
+                className="text-xl text-slate-800 dark:text-slate-100 mb-3"
                 style={{ fontFamily: "var(--font-fraunces)" }}
               >
                 {f.title}
               </h3>
-              <p className="text-sm text-slate-500 leading-relaxed">{f.body}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{f.body}</p>
             </div>
           ))}
         </div>
@@ -361,7 +371,7 @@ export default function LandingPage() {
           ].map((pill) => (
             <span
               key={pill}
-              className="glass-sm rounded-full px-4 py-1.5 text-sm text-slate-600 border border-white/60"
+              className="glass-sm rounded-full px-4 py-1.5 text-sm text-slate-600 dark:text-slate-300 border border-white/60 dark:border-slate-700/40"
             >
               {pill}
             </span>
@@ -374,12 +384,12 @@ export default function LandingPage() {
         <div className="text-center mb-14">
           <p className="text-sm font-semibold text-cyan-600 uppercase tracking-widest mb-3">How it works</p>
           <h2
-            className="text-4xl sm:text-5xl text-slate-800 mb-4"
+            className="text-4xl sm:text-5xl text-slate-800 dark:text-slate-100 mb-4"
             style={{ fontFamily: "var(--font-fraunces)" }}
           >
             Up and running in minutes
           </h2>
-          <p className="text-lg text-slate-500 max-w-lg mx-auto">
+          <p className="text-lg text-slate-500 dark:text-slate-400 max-w-lg mx-auto">
             No setup, no onboarding form. Just create a trip and go.
           </p>
         </div>
@@ -404,13 +414,13 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <step.icon className="w-4 h-4 text-cyan-500 shrink-0" />
                   <h3
-                    className="text-lg text-slate-800"
+                    className="text-lg text-slate-800 dark:text-slate-100"
                     style={{ fontFamily: "var(--font-fraunces)" }}
                   >
                     {step.title}
                   </h3>
                 </div>
-                <p className="text-sm text-slate-500 leading-relaxed">{step.body}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{step.body}</p>
               </div>
             </div>
           ))}
@@ -513,12 +523,12 @@ export default function LandingPage() {
               ))}
             </div>
             <p
-              className="text-2xl sm:text-3xl text-slate-800 mb-3"
+              className="text-2xl sm:text-3xl text-slate-800 dark:text-slate-100 mb-3"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
               "Finally, no more WhatsApp maths"
             </p>
-            <p className="text-slate-500 text-sm">
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
               Stop screenshotting receipts and doing mental arithmetic at 1 AM. Wayfare handles the numbers.
             </p>
           </div>
@@ -534,7 +544,7 @@ export default function LandingPage() {
                 className="glass-sm rounded-xl px-4 py-3 flex items-center gap-2.5 border border-white/60"
               >
                 <span className="text-xl">{item.icon}</span>
-                <span className="text-sm font-medium text-slate-700">{item.label}</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.label}</span>
               </div>
             ))}
           </div>
@@ -558,10 +568,10 @@ export default function LandingPage() {
                 >
                   {s.tag}
                 </div>
-                <p className="text-sm font-semibold text-slate-800 mb-1" style={{ fontFamily: "var(--font-fraunces)" }}>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1" style={{ fontFamily: "var(--font-fraunces)" }}>
                   {s.mode}
                 </p>
-                <p className="text-[11px] text-slate-400 leading-relaxed">{s.example}</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">{s.example}</p>
               </div>
             ))}
           </div>
@@ -570,7 +580,7 @@ export default function LandingPage() {
           <div className="flex-1 text-center lg:text-left">
             <p className="text-sm font-semibold text-cyan-600 uppercase tracking-widest mb-3">Splitting</p>
             <h2
-              className="text-4xl sm:text-5xl text-slate-800 mb-5"
+              className="text-4xl sm:text-5xl text-slate-800 dark:text-slate-100 mb-5"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
               Every trip is different.
@@ -586,7 +596,7 @@ export default function LandingPage() {
                 Split accordingly.
               </span>
             </h2>
-            <p className="text-lg text-slate-500 leading-relaxed max-w-md mx-auto lg:mx-0">
+            <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-md mx-auto lg:mx-0">
               Adults and kids split unequally. One person opts out of the expensive restaurant.
               Someone joins halfway. Wayfare handles all of it.
             </p>
@@ -630,22 +640,22 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/40 bg-white/20 backdrop-blur-sm">
+      <footer className="border-t border-white/40 dark:border-slate-700/40 bg-white/20 dark:bg-slate-900/20 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center">
               <Compass className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-sm font-semibold text-slate-700" style={{ fontFamily: "var(--font-fraunces)" }}>
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200" style={{ fontFamily: "var(--font-fraunces)" }}>
               Wayfare
             </span>
-            <span className="text-slate-300">·</span>
-            <span className="text-xs text-slate-400">Travel together. Settle easy.</span>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">Travel together. Settle easy.</span>
           </div>
-          <div className="flex items-center gap-5 text-xs text-slate-400">
-            <Link href="/login" className="hover:text-slate-600 transition-colors">Sign in</Link>
-            <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-slate-600 transition-colors">Privacy</Link>
+          <div className="flex items-center gap-5 text-xs text-slate-400 dark:text-slate-500">
+            <Link href="/login" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Sign in</Link>
+            <Link href="/terms" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Privacy</Link>
           </div>
         </div>
       </footer>

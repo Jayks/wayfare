@@ -48,12 +48,12 @@ export default function LoginForm({ returnTo }: Props) {
   if (magicSent) {
     return (
       <div className="text-center space-y-3">
-        <div className="w-12 h-12 rounded-full bg-cyan-50 border border-cyan-100 flex items-center justify-center mx-auto">
+        <div className="w-12 h-12 rounded-full bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-100 dark:border-cyan-800/50 flex items-center justify-center mx-auto">
           <Mail className="w-5 h-5 text-cyan-500" />
         </div>
-        <p className="text-sm font-semibold text-slate-800">Check your email</p>
-        <p className="text-xs text-slate-500">
-          We sent a sign-in link to <span className="font-medium text-slate-700">{email}</span>
+        <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Check your email</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          We sent a sign-in link to <span className="font-medium text-slate-700 dark:text-slate-200">{email}</span>
         </p>
         <button
           onClick={() => { setMagicSent(false); setEmail(""); }}
@@ -68,23 +68,23 @@ export default function LoginForm({ returnTo }: Props) {
   return (
     <div className="space-y-4">
       {/* Mode tabs */}
-      <div className="flex rounded-lg border border-slate-200 overflow-hidden text-sm">
+      <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden text-sm">
         <button
           onClick={() => setMode("oauth")}
-          className={`flex-1 py-2 font-medium transition-colors ${mode === "oauth" ? "bg-slate-800 text-white" : "text-slate-500 hover:text-slate-700"}`}
+          className={`flex-1 py-2 font-medium transition-colors ${mode === "oauth" ? "bg-slate-800 dark:bg-slate-600 text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60"}`}
         >
           Google
         </button>
         <button
           onClick={() => setMode("magic")}
-          className={`flex-1 py-2 font-medium transition-colors ${mode === "magic" ? "bg-slate-800 text-white" : "text-slate-500 hover:text-slate-700"}`}
+          className={`flex-1 py-2 font-medium transition-colors ${mode === "magic" ? "bg-slate-800 dark:bg-slate-600 text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60"}`}
         >
           Email link
         </button>
       </div>
 
       {error && (
-        <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 border border-red-100">{error}</p>
+        <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded-lg px-3 py-2 border border-red-100 dark:border-red-800/50">{error}</p>
       )}
 
       {mode === "oauth" ? (
@@ -113,7 +113,7 @@ export default function LoginForm({ returnTo }: Props) {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             required
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/70 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400"
           />
           <button
             type="submit"
