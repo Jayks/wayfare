@@ -49,7 +49,7 @@ export function SettlementBreakdown({
     <div className="mt-8">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 glass rounded-xl hover:shadow-md transition-all text-sm font-medium text-slate-600"
+        className="w-full flex items-center justify-between px-4 py-3 glass rounded-xl hover:shadow-md transition-all text-sm font-medium text-slate-600 dark:text-slate-300"
       >
         <span className="flex items-center gap-2">
           <span className="text-cyan-500 font-semibold">?</span>
@@ -76,8 +76,8 @@ export function SettlementBreakdown({
                 <div className="flex items-center gap-3 mb-4">
                   <StepBadge n={1} />
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">Expense ledger</p>
-                    <p className="text-xs text-slate-500">Every expense and how it was split</p>
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Expense ledger</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Every expense and how it was split</p>
                   </div>
                 </div>
 
@@ -85,15 +85,15 @@ export function SettlementBreakdown({
                   {expensesWithSplits.map(({ expense, splits }) => {
                     const payer = nameOf(expense.paidByMemberId);
                     return (
-                      <div key={expense.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                      <div key={expense.id} className="border-b border-slate-100 dark:border-slate-700/50 pb-3 last:border-0 last:pb-0">
                         {/* Expense header */}
                         <div className="flex items-center gap-2 mb-2">
                           <CategoryIcon category={expense.category} size="sm" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-700 truncate">{expense.description}</p>
-                            <p className="text-xs text-slate-500">{payer} paid</p>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{expense.description}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{payer} paid</p>
                           </div>
-                          <p className="text-sm font-semibold text-slate-800 tabular shrink-0"
+                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 tabular shrink-0"
                             style={{ fontFamily: "var(--font-fraunces)" }}>
                             {formatCurrency(Number(expense.amount), expense.currency)}
                           </p>
@@ -104,10 +104,10 @@ export function SettlementBreakdown({
                           {splits.map((split, i) => {
                             const isLast = i === splits.length - 1;
                             return (
-                              <div key={split.id} className="flex items-center gap-2 text-xs text-slate-500">
-                                <span className="text-slate-300">{isLast ? "└" : "├"}──</span>
+                              <div key={split.id} className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                <span className="text-slate-300 dark:text-slate-600">{isLast ? "└" : "├"}──</span>
                                 <span className="flex-1">{nameOf(split.memberId)}</span>
-                                <span className="tabular font-medium text-slate-600">
+                                <span className="tabular font-medium text-slate-600 dark:text-slate-300">
                                   {formatCurrency(Number(split.shareAmount), expense.currency)}
                                 </span>
                               </div>
@@ -125,18 +125,18 @@ export function SettlementBreakdown({
                 <div className="flex items-center gap-3 mb-1">
                   <StepBadge n={2} />
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">Balance sheet</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Balance sheet</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Paid for group &minus; Your share = Net balance
                     </p>
                   </div>
                 </div>
 
                 {/* Formula callout */}
-                <div className="mx-0 mt-3 mb-4 px-3 py-2 bg-cyan-50 rounded-lg border border-cyan-100 text-xs text-cyan-700 font-medium">
+                <div className="mx-0 mt-3 mb-4 px-3 py-2 bg-cyan-50 dark:bg-cyan-950/40 rounded-lg border border-cyan-100 dark:border-cyan-900/50 text-xs text-cyan-700 dark:text-cyan-300 font-medium">
                   Net = Amount paid &minus; Share owed
                   {pastSettlementsTotal > 0 && (
-                    <span className="block mt-0.5 font-normal text-cyan-600">
+                    <span className="block mt-0.5 font-normal text-cyan-600 dark:text-cyan-400">
                       Adjusted for {formatCurrency(pastSettlementsTotal, currency)} already settled
                     </span>
                   )}
@@ -145,30 +145,30 @@ export function SettlementBreakdown({
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-xs text-slate-400 border-b border-slate-100">
+                      <tr className="text-xs text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700">
                         <th className="text-left pb-2 font-medium">Member</th>
                         <th className="text-right pb-2 font-medium">Paid</th>
                         <th className="text-right pb-2 font-medium">Share owed</th>
                         <th className="text-right pb-2 font-medium">Net</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-50">
+                    <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
                       {balances.map((b) => {
                         const rawNet = b.totalPaid - b.totalOwed;
                         const isPos = b.net > 0;
                         const isZero = b.net === 0;
                         return (
                           <tr key={b.memberId}>
-                            <td className="py-2 text-slate-700 font-medium">{b.displayName}</td>
-                            <td className="py-2 text-right tabular text-slate-600">
+                            <td className="py-2 text-slate-700 dark:text-slate-200 font-medium">{b.displayName}</td>
+                            <td className="py-2 text-right tabular text-slate-600 dark:text-slate-300">
                               {formatCurrency(b.totalPaid, currency)}
                             </td>
-                            <td className="py-2 text-right tabular text-slate-600">
+                            <td className="py-2 text-right tabular text-slate-600 dark:text-slate-300">
                               {formatCurrency(b.totalOwed, currency)}
                             </td>
                             <td className="py-2 text-right tabular">
                               <span className={`inline-flex items-center gap-1 font-semibold ${
-                                isZero ? "text-slate-400" : isPos ? "text-emerald-600" : "text-red-500"
+                                isZero ? "text-slate-400 dark:text-slate-500" : isPos ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
                               }`} style={{ fontFamily: "var(--font-fraunces)" }}>
                                 {isZero
                                   ? <><Minus className="w-3 h-3" /> Settled</>
@@ -191,8 +191,8 @@ export function SettlementBreakdown({
                 <div className="flex items-center gap-3 mb-4">
                   <StepBadge n={3} />
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">Minimum payments</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Minimum payments</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {suggestions.length === 0
                         ? "Everyone is settled — no payments needed"
                         : `${suggestions.length} payment${suggestions.length > 1 ? "s" : ""} to clear all balances (the mathematical minimum)`}
@@ -210,32 +210,32 @@ export function SettlementBreakdown({
                       <div key={i} className="flex items-center gap-3">
                         {/* From */}
                         <div className="flex-1 text-right">
-                          <span className="inline-block bg-red-50 text-red-600 text-sm font-medium px-3 py-1.5 rounded-xl border border-red-100">
+                          <span className="inline-block bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium px-3 py-1.5 rounded-xl border border-red-100 dark:border-red-900/50">
                             {nameOf(s.from)}
                           </span>
                         </div>
 
                         {/* Arrow + amount */}
                         <div className="flex flex-col items-center gap-0.5 shrink-0">
-                          <span className="text-xs font-semibold text-slate-700 tabular">
+                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 tabular">
                             {formatCurrency(s.amount, currency)}
                           </span>
                           <div className="flex items-center gap-0.5">
-                            <div className="w-10 h-px bg-slate-300" />
-                            <ArrowRight className="w-4 h-4 text-slate-400" />
+                            <div className="w-10 h-px bg-slate-300 dark:bg-slate-600" />
+                            <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                           </div>
                         </div>
 
                         {/* To */}
                         <div className="flex-1 text-left">
-                          <span className="inline-block bg-emerald-50 text-emerald-600 text-sm font-medium px-3 py-1.5 rounded-xl border border-emerald-100">
+                          <span className="inline-block bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-sm font-medium px-3 py-1.5 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
                             {nameOf(s.to)}
                           </span>
                         </div>
                       </div>
                     ))}
 
-                    <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-100">
+                    <p className="text-center text-xs text-slate-400 dark:text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-700">
                       {members.length} members · {suggestions.length} of {members.length - 1} max possible transactions
                     </p>
                   </div>

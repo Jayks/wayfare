@@ -39,7 +39,7 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
       <div className="flex items-center justify-between mb-6">
         <Link
           href="/trips"
-          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           All trips
@@ -47,7 +47,7 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
         {isAdmin && (
           <Link
             href={`/trips/${trip.id}/edit`}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 bg-white/60 hover:bg-white/80 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-white/60 hover:bg-white/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" />
             Edit trip
@@ -85,8 +85,8 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
         {trip.description && (
-          <div className="px-5 py-3 border-t border-white/30">
-            <p className="text-slate-600 text-sm">{trip.description}</p>
+          <div className="px-5 py-3 border-t border-white/30 dark:border-slate-700/40">
+            <p className="text-slate-600 dark:text-slate-300 text-sm">{trip.description}</p>
           </div>
         )}
       </div>
@@ -101,8 +101,8 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
             <Users className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-700">Members</p>
-            <p className="text-xs text-slate-500">{members.length} {members.length === 1 ? "person" : "people"}</p>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Members</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{members.length} {members.length === 1 ? "person" : "people"}</p>
           </div>
         </Link>
 
@@ -114,8 +114,8 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
             <Receipt className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-700">Expenses</p>
-            <p className="text-xs text-slate-500">Log what was spent</p>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Expenses</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Log what was spent</p>
           </div>
         </Link>
 
@@ -127,8 +127,8 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
             <Wallet className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-700">Settle up</p>
-            <p className="text-xs text-slate-500">Who owes whom</p>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Settle up</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Who owes whom</p>
           </div>
         </Link>
 
@@ -140,8 +140,8 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
             <BarChart2 className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-700">Insights</p>
-            <p className="text-xs text-slate-500">Spend analytics</p>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Insights</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Spend analytics</p>
           </div>
         </Link>
       </div>
@@ -155,10 +155,10 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
           <Sparkles className="w-4 h-4 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-700">Trip Summary</p>
-          <p className="text-xs text-slate-500">View and share your trip story</p>
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Trip Summary</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">View and share your trip story</p>
         </div>
-        <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-500 transition-colors shrink-0" />
+        <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-cyan-500 transition-colors shrink-0" />
       </Link>
 
       {/* Budget bar */}
@@ -177,8 +177,8 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
         <div className="glass rounded-xl p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-sm font-medium text-slate-700">Invite to trip</p>
-              <p className="text-xs text-slate-500">Share with your group</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Invite to trip</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Share with your group</p>
             </div>
             <div className="flex items-center gap-2">
               <ShareButton url={inviteUrl} tripName={trip.name} />

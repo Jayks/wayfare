@@ -65,15 +65,15 @@ export default async function TripInsightsPage({
     return (
       <div className="max-w-5xl">
         <Link href={`/trips/${id}`}
-          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium mb-6 transition-colors">
+          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back
         </Link>
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <BarChart2 className="w-10 h-10 text-slate-300 mb-4" />
-          <h2 className="text-lg text-slate-700 mb-1" style={{ fontFamily: "var(--font-fraunces)" }}>
+          <BarChart2 className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-4" />
+          <h2 className="text-lg text-slate-700 dark:text-slate-200 mb-1" style={{ fontFamily: "var(--font-fraunces)" }}>
             No expenses yet
           </h2>
-          <p className="text-slate-500 text-sm">Add some expenses and come back for insights.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Add some expenses and come back for insights.</p>
         </div>
       </div>
     );
@@ -84,14 +84,14 @@ export default async function TripInsightsPage({
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href={`/trips/${id}`}
-          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors">
+          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back
         </Link>
         <div>
-          <h1 className="text-2xl text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>
+          <h1 className="text-2xl text-slate-800 dark:text-slate-100" style={{ fontFamily: "var(--font-fraunces)" }}>
             Insights
           </h1>
-          <p className="text-xs text-slate-500">{trip.name}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{trip.name}</p>
         </div>
       </div>
 
@@ -146,7 +146,7 @@ export default async function TripInsightsPage({
       )}
 
       {/* Smart insights */}
-      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+      <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
         Smart insights
       </h2>
       <AnimatedList className="grid grid-cols-1 sm:grid-cols-2 gap-3" staggerMs={50}>

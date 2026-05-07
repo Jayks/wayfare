@@ -33,12 +33,12 @@ export default async function ExpensesPage({ params }: { params: Promise<{ id: s
       <div className="flex items-center gap-3 mb-6">
         <Link
           href={`/trips/${id}`}
-          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
         </Link>
-        <h1 className="text-2xl text-slate-800 flex-1" style={{ fontFamily: "var(--font-fraunces)" }}>
+        <h1 className="text-2xl text-slate-800 dark:text-slate-100 flex-1" style={{ fontFamily: "var(--font-fraunces)" }}>
           Expenses
         </h1>
         <ChatImportDialog
@@ -53,7 +53,7 @@ export default async function ExpensesPage({ params }: { params: Promise<{ id: s
           <a
             href={`/api/trips/${id}/export`}
             download
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 bg-white/60 hover:bg-white/80 border border-slate-200 px-3 py-2 rounded-xl transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-white/60 hover:bg-white/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl transition-colors"
           >
             <Download className="w-4 h-4" />
             Export
@@ -73,10 +73,10 @@ export default async function ExpensesPage({ params }: { params: Promise<{ id: s
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/25">
             <Receipt className="w-7 h-7 text-white" />
           </div>
-          <h2 className="text-lg text-slate-800 mb-1" style={{ fontFamily: "var(--font-fraunces)" }}>
+          <h2 className="text-lg text-slate-800 dark:text-slate-100 mb-1" style={{ fontFamily: "var(--font-fraunces)" }}>
             No expenses yet
           </h2>
-          <p className="text-slate-500 text-sm mb-5">Log your first expense and start tracking.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Log your first expense and start tracking.</p>
           <Link
             href={`/trips/${id}/expenses/new`}
             className="inline-flex items-center gap-1.5 bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl px-5 py-2.5 shadow-md shadow-cyan-500/25 transition-all"
@@ -89,8 +89,8 @@ export default async function ExpensesPage({ params }: { params: Promise<{ id: s
         <>
           {/* Grand total banner */}
           <div className="glass rounded-xl px-4 py-3 flex items-center justify-between mb-4">
-            <span className="text-sm text-slate-500">Total spent</span>
-            <span className="text-lg font-semibold text-slate-800 tabular" style={{ fontFamily: "var(--font-fraunces)" }}>
+            <span className="text-sm text-slate-500 dark:text-slate-400">Total spent</span>
+            <span className="text-lg font-semibold text-slate-800 dark:text-slate-100 tabular" style={{ fontFamily: "var(--font-fraunces)" }}>
               {formatCurrency(total, trip.defaultCurrency)}
             </span>
           </div>

@@ -67,7 +67,7 @@ export function SplitEditor({ members, amount, currency, mode, onModeChange, onS
   return (
     <div>
       {/* Mode tabs */}
-      <div className="flex rounded-xl border border-slate-200 overflow-hidden mb-3">
+      <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden mb-3">
         {MODES.map((m) => (
           <button
             key={m.value}
@@ -76,7 +76,7 @@ export function SplitEditor({ members, amount, currency, mode, onModeChange, onS
             className={`flex-1 py-2 text-sm font-medium transition-colors ${
               mode === m.value
                 ? "bg-gradient-to-br from-cyan-500 to-teal-500 text-white"
-                : "bg-white/60 text-slate-600 hover:bg-slate-50"
+                : "bg-white/60 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60"
             }`}
           >
             {m.label}
@@ -90,7 +90,7 @@ export function SplitEditor({ members, amount, currency, mode, onModeChange, onS
           const selected = selectedIds.has(member.id);
           const preview = previewMap[member.id];
           return (
-            <div key={member.id} className={`flex items-center gap-3 px-3 py-2 rounded-xl border transition-colors ${selected ? "border-cyan-200 bg-cyan-50/50" : "border-slate-100 bg-white/40 opacity-50"}`}>
+            <div key={member.id} className={`flex items-center gap-3 px-3 py-2 rounded-xl border transition-colors ${selected ? "border-cyan-200 dark:border-cyan-800/50 bg-cyan-50/50 dark:bg-cyan-950/30" : "border-slate-100 dark:border-slate-700/50 bg-white/40 dark:bg-slate-800/30 opacity-50"}`}>
               {/* Checkbox */}
               <input
                 type="checkbox"
@@ -100,7 +100,7 @@ export function SplitEditor({ members, amount, currency, mode, onModeChange, onS
               />
 
               {/* Name */}
-              <span className="text-sm text-slate-700 flex-1 truncate">{memberLabel(member)}</span>
+              <span className="text-sm text-slate-700 dark:text-slate-200 flex-1 truncate">{memberLabel(member)}</span>
 
               {/* Input (for non-equal modes) */}
               {mode !== "equal" && selected && (
@@ -111,13 +111,13 @@ export function SplitEditor({ members, amount, currency, mode, onModeChange, onS
                   placeholder={mode === "percentage" ? "%" : mode === "shares" ? "shares" : "0.00"}
                   value={values[member.id] ?? ""}
                   onChange={(e) => setValue(member.id, e.target.value)}
-                  className="w-24 text-right text-sm px-2 py-1 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="w-24 text-right text-sm px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               )}
 
               {/* Preview amount */}
               {selected && preview != null && (
-                <span className="text-sm font-medium text-slate-600 tabular w-20 text-right shrink-0">
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 tabular w-20 text-right shrink-0">
                   {formatCurrency(preview, currency)}
                 </span>
               )}

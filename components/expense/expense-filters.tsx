@@ -90,7 +90,7 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search expenses…"
-            className="w-full pl-9 pr-8 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-400"
+            className="w-full pl-9 pr-8 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
           {search && (
             <button
@@ -106,7 +106,7 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
-            className="appearance-none pl-3 pr-7 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-slate-600 cursor-pointer"
+            className="appearance-none pl-3 pr-7 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-slate-600 dark:text-slate-300 cursor-pointer"
           >
             <option value="date-desc">Newest</option>
             <option value="date-asc">Oldest</option>
@@ -140,7 +140,7 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 active
                   ? "bg-gradient-to-br from-cyan-500 to-teal-500 text-white shadow-sm"
-                  : "bg-white/60 text-slate-600 hover:bg-slate-100 border border-slate-200"
+                  : "bg-white/60 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
               }`}
             >
               <catMeta.icon className="w-3 h-3" />
@@ -156,7 +156,7 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
           <select
             value={payerId ?? ""}
             onChange={(e) => setPayerId(e.target.value || null)}
-            className="appearance-none pl-3 pr-7 py-1.5 text-xs rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-slate-600 cursor-pointer"
+            className="appearance-none pl-3 pr-7 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-slate-600 dark:text-slate-300 cursor-pointer"
           >
             <option value="">All payers</option>
             {payers.map((m) => (
@@ -172,7 +172,7 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
           min={tripStartDate ?? undefined}
           max={dateTo || (tripEndDate ?? undefined)}
           onChange={(e) => setDateFrom(e.target.value)}
-          className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-slate-500"
+          className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-slate-500 dark:text-slate-400"
         />
         <span className="text-slate-400 text-xs">to</span>
         <input
@@ -181,13 +181,13 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
           min={dateFrom || (tripStartDate ?? undefined)}
           max={tripEndDate ?? undefined}
           onChange={(e) => setDateTo(e.target.value)}
-          className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-slate-500"
+          className="px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-slate-500 dark:text-slate-400"
         />
 
         {isFiltered && (
           <button
             onClick={clearAll}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl transition-colors"
           >
             <X className="w-3 h-3" />
             Clear
@@ -197,13 +197,13 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
 
       {/* ── Results bar ─────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-3 px-0.5">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           {isFiltered
             ? `${filtered.length} of ${expenses.length} expenses`
             : `${expenses.length} expenses`}
         </p>
         <p
-          className="text-sm font-semibold text-slate-700 tabular"
+          className="text-sm font-semibold text-slate-700 dark:text-slate-200 tabular"
           style={{ fontFamily: "var(--font-fraunces)" }}
         >
           {formatCurrency(filteredTotal, currency)}
@@ -212,7 +212,7 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
 
       {/* ── Expense list ────────────────────────────────────────── */}
       {filtered.length === 0 ? (
-        <div className="py-14 text-center text-slate-400 text-sm glass rounded-xl">
+        <div className="py-14 text-center text-slate-400 dark:text-slate-500 text-sm glass rounded-xl">
           No expenses match your filters.
         </div>
       ) : (

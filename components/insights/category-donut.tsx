@@ -18,9 +18,9 @@ function CustomTooltip({ active, payload }: TooltipEntry) {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg border border-white/60">
-      <p className="font-semibold text-slate-700">{d.label}</p>
-      <p className="text-slate-500">{formatCurrency(d.amount, "INR")} · {d.percentage}%</p>
+    <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg border border-white/60 dark:border-slate-700/60">
+      <p className="font-semibold text-slate-700 dark:text-slate-200">{d.label}</p>
+      <p className="text-slate-500 dark:text-slate-400">{formatCurrency(d.amount, "INR")} · {d.percentage}%</p>
     </div>
   );
 }
@@ -30,7 +30,7 @@ export function CategoryDonut({ data, currency }: Props) {
 
   return (
     <div className="glass rounded-2xl p-5">
-      <p className="text-sm font-semibold text-slate-700 mb-3">Spend by category</p>
+      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">Spend by category</p>
 
       {/* Chart — no built-in legend */}
       <ResponsiveContainer width="100%" height={180}>
@@ -61,8 +61,8 @@ export function CategoryDonut({ data, currency }: Props) {
               className="w-2.5 h-2.5 rounded-full shrink-0"
               style={{ backgroundColor: entry.hex }}
             />
-            <span className="text-xs text-slate-600 truncate">{entry.label}</span>
-            <span className="text-xs text-slate-400 ml-auto shrink-0">{entry.percentage}%</span>
+            <span className="text-xs text-slate-600 dark:text-slate-300 truncate">{entry.label}</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500 ml-auto shrink-0">{entry.percentage}%</span>
           </div>
         ))}
       </div>

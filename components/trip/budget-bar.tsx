@@ -15,10 +15,10 @@ export function BudgetBar({ spent, budget, currency }: BudgetBarProps) {
     <div className="glass rounded-xl px-4 py-4">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Budget</p>
-          <p className="text-sm font-semibold text-slate-700 mt-0.5">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Budget</p>
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mt-0.5">
             {formatCurrency(spent, currency)}
-            <span className="text-xs font-normal text-slate-400 ml-1">
+            <span className="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">
               of {formatCurrency(budget, currency)}
             </span>
           </p>
@@ -32,7 +32,7 @@ export function BudgetBar({ spent, budget, currency }: BudgetBarProps) {
       </div>
 
       {/* Track */}
-      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+      <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
             over
@@ -44,7 +44,7 @@ export function BudgetBar({ spent, budget, currency }: BudgetBarProps) {
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="text-xs text-slate-400 mt-1 text-right">{Math.round(pct)}% used</p>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 text-right">{Math.round(pct)}% used</p>
     </div>
   );
 }

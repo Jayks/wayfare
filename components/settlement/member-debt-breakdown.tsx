@@ -31,7 +31,7 @@ export function MemberDebtBreakdown({ members, suggestions, currency }: Props) {
     <div className="mt-6">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 glass rounded-xl hover:shadow-md transition-all text-sm font-medium text-slate-600"
+        className="w-full flex items-center justify-between px-4 py-3 glass rounded-xl hover:shadow-md transition-all text-sm font-medium text-slate-600 dark:text-slate-300"
       >
         <span className="flex items-center gap-2">
           <span className="text-cyan-500 font-semibold">↔</span>
@@ -62,9 +62,9 @@ export function MemberDebtBreakdown({ members, suggestions, currency }: Props) {
                   <div key={memberId} className="glass rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <MemberAvatar name={getMemberName(member)} size="sm" />
-                      <span className="text-sm font-semibold text-slate-700">{getMemberName(member)}</span>
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{getMemberName(member)}</span>
                       {isSettled && (
-                        <span className="ml-auto inline-flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                        <span className="ml-auto inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Settled
                         </span>
                       )}
@@ -74,10 +74,10 @@ export function MemberDebtBreakdown({ members, suggestions, currency }: Props) {
                       <div className="space-y-1.5 mb-2">
                         {owes.map((t, i) => (
                           <div key={i} className="flex items-center gap-2 text-sm">
-                            <span className="text-xs text-red-500 font-medium w-7 text-right">owes</span>
-                            <ArrowRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-                            <span className="text-slate-600 flex-1">{nameOf(t.to)}</span>
-                            <span className="font-semibold text-red-500 tabular">{formatCurrency(t.amount, currency)}</span>
+                            <span className="text-xs text-red-500 dark:text-red-400 font-medium w-7 text-right">owes</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+                            <span className="text-slate-600 dark:text-slate-300 flex-1">{nameOf(t.to)}</span>
+                            <span className="font-semibold text-red-500 dark:text-red-400 tabular">{formatCurrency(t.amount, currency)}</span>
                           </div>
                         ))}
                       </div>
@@ -87,10 +87,10 @@ export function MemberDebtBreakdown({ members, suggestions, currency }: Props) {
                       <div className="space-y-1.5">
                         {isOwed.map((t, i) => (
                           <div key={i} className="flex items-center gap-2 text-sm">
-                            <span className="text-xs text-emerald-600 font-medium w-7 text-right">gets</span>
-                            <ArrowRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-                            <span className="text-slate-600 flex-1">{nameOf(t.from)}</span>
-                            <span className="font-semibold text-emerald-600 tabular">{formatCurrency(t.amount, currency)}</span>
+                            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium w-7 text-right">gets</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+                            <span className="text-slate-600 dark:text-slate-300 flex-1">{nameOf(t.from)}</span>
+                            <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular">{formatCurrency(t.amount, currency)}</span>
                           </div>
                         ))}
                       </div>

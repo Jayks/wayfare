@@ -19,9 +19,9 @@ interface TooltipEntry {
 function CustomTooltip({ active, payload, label, currency }: TooltipEntry) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg">
-      <p className="font-semibold text-slate-700">{label}</p>
-      <p className="text-cyan-600 font-medium">{formatCurrency(payload[0].value, currency)}</p>
+    <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg border border-white/60 dark:border-slate-700/60">
+      <p className="font-semibold text-slate-700 dark:text-slate-200">{label}</p>
+      <p className="text-cyan-600 dark:text-cyan-400 font-medium">{formatCurrency(payload[0].value, currency)}</p>
     </div>
   );
 }
@@ -33,7 +33,7 @@ export function DailySpendBar({ data, currency }: Props) {
 
   return (
     <div className="glass rounded-2xl p-5">
-      <p className="text-sm font-semibold text-slate-700 mb-4">Daily spend</p>
+      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Daily spend</p>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
           <XAxis

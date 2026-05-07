@@ -39,7 +39,7 @@ export function NarrativeSection(props: Props) {
     <div className="glass rounded-2xl p-5 mb-6">
       <div className="flex items-center justify-between mb-3">
         <h2
-          className="text-base font-semibold text-slate-700"
+          className="text-base font-semibold text-slate-700 dark:text-slate-200"
           style={{ fontFamily: "var(--font-fraunces)" }}
         >
           Trip story
@@ -47,7 +47,7 @@ export function NarrativeSection(props: Props) {
         {narrative && !loading && (
           <button
             onClick={generate}
-            className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-500 transition-colors"
+            className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500 hover:text-cyan-500 transition-colors"
           >
             <RefreshCw className="w-3 h-3" />
             Regenerate
@@ -57,7 +57,7 @@ export function NarrativeSection(props: Props) {
 
       {!narrative && !loading && !error && (
         <div className="flex flex-col items-center py-6 text-center">
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
             Let AI write a travel story from your trip data.
           </p>
           <button
@@ -71,7 +71,7 @@ export function NarrativeSection(props: Props) {
       )}
 
       {loading && (
-        <div className="flex flex-col items-center py-6 gap-3 text-slate-500">
+        <div className="flex flex-col items-center py-6 gap-3 text-slate-500 dark:text-slate-400">
           <Loader2 className="w-5 h-5 animate-spin text-cyan-500" />
           <p className="text-sm">Writing your story…</p>
         </div>
@@ -94,7 +94,7 @@ export function NarrativeSection(props: Props) {
           {narrative.split("\n\n").map((para, i) => (
             <p
               key={i}
-              className="text-sm text-slate-600 leading-relaxed italic"
+              className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic"
             >
               {para}
             </p>

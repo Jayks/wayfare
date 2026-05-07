@@ -10,9 +10,9 @@ interface Props {
 }
 
 function coverageColor(pct: number) {
-  if (pct >= 80) return { bar: "bg-teal-500", text: "text-teal-600", badge: "bg-teal-50" };
-  if (pct >= 50) return { bar: "bg-amber-400", text: "text-amber-600", badge: "bg-amber-50" };
-  return { bar: "bg-red-400", text: "text-red-600", badge: "bg-red-50" };
+  if (pct >= 80) return { bar: "bg-teal-500", text: "text-teal-600 dark:text-teal-400", badge: "bg-teal-50 dark:bg-teal-900/30" };
+  if (pct >= 50) return { bar: "bg-amber-400", text: "text-amber-600 dark:text-amber-400", badge: "bg-amber-50 dark:bg-amber-900/30" };
+  return { bar: "bg-red-400", text: "text-red-600 dark:text-red-400", badge: "bg-red-50 dark:bg-red-900/30" };
 }
 
 export function AdherenceCard({ itinerary, expenses }: Props) {
@@ -37,14 +37,14 @@ export function AdherenceCard({ itinerary, expenses }: Props) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <GitCompare className="w-4 h-4 text-cyan-500" />
-          <h2 className="text-base font-semibold text-slate-700" style={{ fontFamily: "var(--font-fraunces)" }}>
+          <h2 className="text-base font-semibold text-slate-700 dark:text-slate-200" style={{ fontFamily: "var(--font-fraunces)" }}>
             Plan vs Reality
           </h2>
         </div>
         {result && !loading && (
           <button
             onClick={analyse}
-            className="text-xs text-slate-400 hover:text-cyan-500 transition-colors"
+            className="text-xs text-slate-400 dark:text-slate-500 hover:text-cyan-500 transition-colors"
           >
             Re-analyse
           </button>
@@ -54,7 +54,7 @@ export function AdherenceCard({ itinerary, expenses }: Props) {
       {/* Initial state */}
       {!result && !loading && !error && (
         <div className="flex flex-col items-center py-6 text-center">
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
             Compare your planned itinerary against what actually happened.
           </p>
           <button
@@ -69,7 +69,7 @@ export function AdherenceCard({ itinerary, expenses }: Props) {
 
       {/* Loading */}
       {loading && (
-        <div className="flex flex-col items-center py-6 gap-3 text-slate-500">
+        <div className="flex flex-col items-center py-6 gap-3 text-slate-500 dark:text-slate-400">
           <Loader2 className="w-5 h-5 animate-spin text-cyan-500" />
           <p className="text-sm">Comparing plan to reality…</p>
         </div>
@@ -94,7 +94,7 @@ export function AdherenceCard({ itinerary, expenses }: Props) {
               {result.coveragePercent}%
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-700 mb-1.5">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
                 {result.coveredCount} of {result.plannedCount} planned activities completed
               </p>
               <div className="h-2 bg-white/60 rounded-full overflow-hidden">
@@ -110,13 +110,13 @@ export function AdherenceCard({ itinerary, expenses }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Covered */}
             {result.coveredItems.length > 0 && (
-              <div className="bg-teal-50/60 rounded-xl p-3">
-                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-2 flex items-center gap-1">
+              <div className="bg-teal-50/60 dark:bg-teal-900/20 rounded-xl p-3">
+                <p className="text-xs font-semibold text-teal-700 dark:text-teal-400 uppercase tracking-wide mb-2 flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Covered
                 </p>
                 <ul className="space-y-1">
                   {result.coveredItems.map((item, i) => (
-                    <li key={i} className="text-xs text-teal-800 flex items-start gap-1.5">
+                    <li key={i} className="text-xs text-teal-800 dark:text-teal-300 flex items-start gap-1.5">
                       <span className="mt-0.5 shrink-0">✓</span> {item}
                     </li>
                   ))}
@@ -126,14 +126,14 @@ export function AdherenceCard({ itinerary, expenses }: Props) {
 
             {/* Missed */}
             {result.missedItems.length > 0 && (
-              <div className="bg-slate-50/80 rounded-xl p-3">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+              <div className="bg-slate-50/80 dark:bg-slate-800/60 rounded-xl p-3">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
                   <XCircle className="w-3.5 h-3.5" /> Missed
                 </p>
                 <ul className="space-y-1">
                   {result.missedItems.map((item, i) => (
-                    <li key={i} className="text-xs text-slate-600 flex items-start gap-1.5">
-                      <span className="mt-0.5 shrink-0 text-slate-400">✗</span> {item}
+                    <li key={i} className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-1.5">
+                      <span className="mt-0.5 shrink-0 text-slate-400 dark:text-slate-500">✗</span> {item}
                     </li>
                   ))}
                 </ul>
@@ -142,13 +142,13 @@ export function AdherenceCard({ itinerary, expenses }: Props) {
 
             {/* Surprises */}
             {result.surprises.length > 0 && (
-              <div className="bg-cyan-50/60 rounded-xl p-3">
-                <p className="text-xs font-semibold text-cyan-700 uppercase tracking-wide mb-2 flex items-center gap-1">
+              <div className="bg-cyan-50/60 dark:bg-cyan-900/20 rounded-xl p-3">
+                <p className="text-xs font-semibold text-cyan-700 dark:text-cyan-400 uppercase tracking-wide mb-2 flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5" /> Surprises
                 </p>
                 <ul className="space-y-1">
                   {result.surprises.map((item, i) => (
-                    <li key={i} className="text-xs text-cyan-800 flex items-start gap-1.5">
+                    <li key={i} className="text-xs text-cyan-800 dark:text-cyan-300 flex items-start gap-1.5">
                       <span className="mt-0.5 shrink-0">★</span> {item}
                     </li>
                   ))}
@@ -159,7 +159,7 @@ export function AdherenceCard({ itinerary, expenses }: Props) {
 
           {/* AI summary */}
           {result.summary && (
-            <p className="text-xs text-slate-500 italic border-t border-slate-100 pt-3">
+            <p className="text-xs text-slate-500 dark:text-slate-400 italic border-t border-slate-100 dark:border-slate-700 pt-3">
               {result.summary}
             </p>
           )}

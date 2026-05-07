@@ -124,7 +124,7 @@ export default async function SummaryPage({
             <Compass className="w-4 h-4 text-white" />
           </div>
           <span
-            className="font-semibold text-slate-700 group-hover:text-cyan-600 transition-colors"
+            className="font-semibold text-slate-700 dark:text-slate-200 group-hover:text-cyan-600 transition-colors"
             style={{ fontFamily: "var(--font-fraunces)" }}
           >
             Wayfare
@@ -133,7 +133,7 @@ export default async function SummaryPage({
         {isLoggedIn ? (
           <Link
             href="/trips"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 transition-colors"
           >
             ← My trips
           </Link>
@@ -150,7 +150,7 @@ export default async function SummaryPage({
       <div className="max-w-2xl mx-auto px-4 py-8">
 
         {/* Hero */}
-        <div className="glass rounded-3xl overflow-hidden mb-6 shadow-xl shadow-slate-200/60">
+        <div className="glass rounded-3xl overflow-hidden mb-6 shadow-xl shadow-slate-200/60 dark:shadow-black/40">
           <div className="h-64 relative">
             {trip.coverPhotoUrl ? (
               <Image
@@ -183,8 +183,8 @@ export default async function SummaryPage({
             </div>
           </div>
           {trip.description && (
-            <div className="px-6 py-3 border-t border-white/20">
-              <p className="text-sm text-slate-600">{trip.description}</p>
+            <div className="px-6 py-3 border-t border-white/20 dark:border-slate-700/40">
+              <p className="text-sm text-slate-600 dark:text-slate-300">{trip.description}</p>
             </div>
           )}
         </div>
@@ -199,12 +199,12 @@ export default async function SummaryPage({
           ].map(({ label, value, accent }) => (
             <div
               key={label}
-              className={`glass rounded-2xl p-4 ${accent ? "ring-1 ring-cyan-500/30 bg-cyan-50/40" : ""}`}
+              className={`glass rounded-2xl p-4 ${accent ? "ring-1 ring-cyan-500/30 bg-cyan-50/40 dark:bg-cyan-950/30" : ""}`}
             >
-              <p className={`text-xl font-bold tabular-nums leading-tight ${accent ? "text-cyan-600" : "text-slate-800"}`}>
+              <p className={`text-xl font-bold tabular-nums leading-tight ${accent ? "text-cyan-600 dark:text-cyan-400" : "text-slate-800 dark:text-slate-100"}`}>
                 {value}
               </p>
-              <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{label}</p>
             </div>
           ))}
         </div>
@@ -213,7 +213,7 @@ export default async function SummaryPage({
         {categoryTotals.length > 0 && (
           <div className="glass rounded-2xl p-5 mb-6">
             <h2
-              className="text-base font-semibold text-slate-700 mb-4"
+              className="text-base font-semibold text-slate-700 dark:text-slate-200 mb-4"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
               Where the money went
@@ -229,16 +229,16 @@ export default async function SummaryPage({
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: hex }} />
-                        <span className="text-sm text-slate-700">{cat.label}</span>
+                        <span className="text-sm text-slate-700 dark:text-slate-200">{cat.label}</span>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-xs text-slate-400 w-8 text-right">{pct}%</span>
-                        <span className="text-sm font-semibold text-slate-700 tabular-nums w-24 text-right">
+                        <span className="text-xs text-slate-400 dark:text-slate-500 w-8 text-right">{pct}%</span>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 tabular-nums w-24 text-right">
                           {fmtTotal}
                         </span>
                       </div>
                     </div>
-                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full"
                         style={{ width: `${pct}%`, backgroundColor: hex }}
@@ -275,17 +275,17 @@ export default async function SummaryPage({
         {/* Share */}
         <div className="glass rounded-2xl p-6 flex flex-col items-center text-center mb-6">
           <p
-            className="text-xl font-semibold text-slate-700 mb-1"
+            className="text-xl font-semibold text-slate-700 dark:text-slate-200 mb-1"
             style={{ fontFamily: "var(--font-fraunces)" }}
           >
             Share this trip story
           </p>
-          <p className="text-sm text-slate-500 mb-5">Let the group relive the adventure</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">Let the group relive the adventure</p>
           <SummaryShareButton url={shareUrl} tripName={trip.name} />
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-slate-400 dark:text-slate-500">
           Made with{" "}
           <Link href="/" className="text-cyan-500 hover:text-cyan-600 font-medium transition-colors">
             Wayfare

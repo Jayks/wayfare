@@ -10,7 +10,7 @@ export default async function TripsPage() {
   return (
     <div>
       <div className="flex items-center gap-4 mb-8">
-        <h1 className="text-3xl text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>
+        <h1 className="text-3xl text-slate-800 dark:text-slate-100" style={{ fontFamily: "var(--font-fraunces)" }}>
           Your trips
         </h1>
         <Link
@@ -27,10 +27,10 @@ export default async function TripsPage() {
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center mb-5 shadow-lg shadow-cyan-500/25">
             <MapPin className="w-9 h-9 text-white" />
           </div>
-          <h2 className="text-xl text-slate-800 mb-2" style={{ fontFamily: "var(--font-fraunces)" }}>
+          <h2 className="text-xl text-slate-800 dark:text-slate-100 mb-2" style={{ fontFamily: "var(--font-fraunces)" }}>
             No trips yet
           </h2>
-          <p className="text-slate-500 text-sm max-w-xs">
+          <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs">
             Create your first trip and invite your travel companions. Expenses and settlements follow.
           </p>
           <Link
@@ -52,7 +52,7 @@ export default async function TripsPage() {
 
           {archived.length > 0 && (
             <div className="mt-10">
-              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4 flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-4 flex items-center gap-2">
                 <Archive className="w-4 h-4" /> Archived
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 opacity-60">
