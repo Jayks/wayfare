@@ -2,6 +2,7 @@
   "name": "wayfare",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -14,7 +15,9 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "seed": "tsx --env-file=.env.local scripts/seed-test.ts",
-    "seed:temple": "tsx --env-file=.env.local scripts/seed-temple-tour.ts"
+    "seed:temple": "tsx --env-file=.env.local scripts/seed-temple-tour.ts",
+    "manual:screenshots": "node --experimental-vm-modules scripts/take-screenshots.js",
+    "manual:pdf": "node scripts/generate-manual-pdf.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.94.0",
@@ -51,6 +54,7 @@
     "drizzle-kit": "^0.31.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "puppeteer-core": "^24.43.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",

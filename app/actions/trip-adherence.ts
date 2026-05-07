@@ -62,7 +62,7 @@ Rules:
         messages: [
           {
             role: "user",
-            content: `Trip plan:\n${itinerary}\n\nActual expenses:\n${expenseLines}`,
+            content: `<trip_plan>${itinerary}</trip_plan>\n<actual_expenses>${expenseLines}</actual_expenses>`,
           },
         ],
       }),

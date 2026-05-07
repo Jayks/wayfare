@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { LogOut, Compass, BarChart2, MapPin, LayoutDashboard } from "lucide-react";
+import { LogOut, Compass, BarChart2, MapPin, LayoutDashboard, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
@@ -77,6 +77,18 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
         </nav>
 
         <ThemeToggle />
+
+        {/* User manual link */}
+        <a
+          href="/docs/wayfare-user-manual.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+          title="User Manual"
+        >
+          <BookOpen className="w-4 h-4" />
+          Help
+        </a>
 
         {/* Avatar */}
         <DropdownMenu>

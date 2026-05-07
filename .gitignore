@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# docs — local scratch directory (session cookies, generated PDF). Never commit.
+# The manual HTML and screenshots live in public/docs/ and ARE committed (Vercel needs them).
+/docs/
