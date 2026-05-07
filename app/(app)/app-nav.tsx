@@ -14,6 +14,7 @@ import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { LogOut, Compass, BarChart2, MapPin, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 const NAV_LINKS = [
   { href: "/trips",    label: "Trips",    icon: MapPin    },
@@ -48,7 +49,7 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-sm shadow-cyan-500/30 group-hover:shadow-cyan-500/50 transition-shadow">
             <Compass className="w-4 h-4 text-white" />
           </div>
-          <span className="text-xl text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>
+          <span className="text-xl text-slate-800 dark:text-slate-100" style={{ fontFamily: "var(--font-fraunces)" }}>
             Wayfare
           </span>
         </Link>
@@ -64,8 +65,8 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                   active
-                    ? "text-cyan-600 bg-cyan-50"
-                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                    ? "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/50 dark:text-cyan-400"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
                 )}
               >
                 <Icon className="w-4 h-4" />
@@ -74,6 +75,8 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
             );
           })}
         </nav>
+
+        <ThemeToggle />
 
         {/* Avatar */}
         <DropdownMenu>
@@ -87,14 +90,14 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52 glass border-white/70 shadow-lg shadow-cyan-500/10">
+          <DropdownMenuContent align="end" className="w-52 glass border-white/70 dark:border-slate-700/60 shadow-lg shadow-cyan-500/10">
             <div className="px-3 py-2">
-              <p className="text-sm font-medium text-slate-800 truncate">
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">
                 {user.user_metadata?.full_name ?? "Traveller"}
               </p>
-              <p className="text-xs text-slate-500 truncate">{user.email}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
             </div>
-            <DropdownMenuSeparator className="bg-slate-100" />
+            <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-700" />
             {isAdmin && (
               <DropdownMenuItem
                 onClick={() => router.push("/admin")}

@@ -52,7 +52,7 @@ export function TripCard({ trip, memberCount }: TripCardProps) {
 
       {/* Footer */}
       <div className="px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-slate-500 text-xs">
+        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs">
           <Users className="w-3.5 h-3.5" />
           {memberCount} {memberCount === 1 ? "member" : "members"}
         </div>

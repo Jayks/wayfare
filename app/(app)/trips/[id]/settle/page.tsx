@@ -46,18 +46,18 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
       <div className="flex items-center gap-3 mb-6">
         <Link
           href={`/trips/${id}`}
-          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
         </Link>
-        <h1 className="text-2xl text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>
+        <h1 className="text-2xl text-slate-800 dark:text-slate-100" style={{ fontFamily: "var(--font-fraunces)" }}>
           Settle up
         </h1>
       </div>
 
       {/* Balance summary */}
-      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+      <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
         Balances
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
@@ -67,22 +67,22 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
           return (
             <div key={b.memberId} className="glass rounded-xl px-4 py-3 flex items-center gap-3">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                isZero ? "bg-slate-100" : isPositive ? "bg-emerald-100" : "bg-red-100"
+                isZero ? "bg-slate-100 dark:bg-slate-800" : isPositive ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-red-100 dark:bg-red-900/30"
               }`}>
                 {isZero
-                  ? <Minus className="w-4 h-4 text-slate-400" />
+                  ? <Minus className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                   : isPositive
-                  ? <TrendingUp className="w-4 h-4 text-emerald-600" />
-                  : <TrendingDown className="w-4 h-4 text-red-500" />}
+                  ? <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  : <TrendingDown className="w-4 h-4 text-red-500 dark:text-red-400" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-700 truncate">{b.displayName}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{b.displayName}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {isZero ? "Settled" : isPositive ? "is owed" : "owes"}
                 </p>
               </div>
               {isZero ? (
-                <span className="text-base font-semibold text-slate-400 shrink-0" style={{ fontFamily: "var(--font-fraunces)" }}>—</span>
+                <span className="text-base font-semibold text-slate-400 dark:text-slate-500 shrink-0" style={{ fontFamily: "var(--font-fraunces)" }}>—</span>
               ) : (
                 <CountUp
                   value={Math.abs(b.net)}
@@ -96,29 +96,29 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Suggested transactions */}
-      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+      <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
         Suggested payments
       </h2>
       {suggestions.length === 0 ? (
         <div className="glass rounded-xl px-4 py-6 flex flex-col items-center gap-2 mb-8">
-          <CheckCircle2 className="w-8 h-8 text-emerald-500" />
-          <p className="text-sm font-medium text-slate-700">All settled up!</p>
-          <p className="text-xs text-slate-500">No payments needed.</p>
+          <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400" />
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">All settled up!</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">No payments needed.</p>
         </div>
       ) : (
         <div className="space-y-2 mb-8">
           {suggestions.map((s, i) => (
             <div key={i} className="glass rounded-xl px-4 py-3 flex items-center gap-3">
               <div className="flex-1 flex items-center gap-2 min-w-0">
-                <span className="text-sm font-medium text-slate-700 truncate">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
                   {memberName(s.from)}
                 </span>
-                <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
-                <span className="text-sm font-medium text-slate-700 truncate">
+                <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
                   {memberName(s.to)}
                 </span>
               </div>
-              <span className="text-base font-semibold text-slate-800 tabular shrink-0"
+              <span className="text-base font-semibold text-slate-800 dark:text-slate-100 tabular shrink-0"
                 style={{ fontFamily: "var(--font-fraunces)" }}>
                 {formatCurrency(s.amount, trip.defaultCurrency)}
               </span>
@@ -159,26 +159,26 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
       {/* Settlement history */}
       {settlementHistory.length > 0 && (
         <>
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
             Payment history
           </h2>
           <div className="space-y-2">
             {settlementHistory.map((s) => (
               <div key={s.id} className="glass rounded-xl px-4 py-3 flex items-center gap-3 opacity-75">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                  <div className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
                     <span className="font-medium truncate">{memberName(s.fromMemberId)}</span>
-                    <ArrowRight className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                    <ArrowRight className="w-3.5 h-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
                     <span className="font-medium truncate">{memberName(s.toMemberId)}</span>
                   </div>
-                  {s.note && <p className="text-xs text-slate-400 mt-0.5 truncate">{s.note}</p>}
+                  {s.note && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">{s.note}</p>}
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-semibold text-slate-700 tabular">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 tabular">
                     {formatCurrency(Number(s.amount), s.currency)}
                   </p>
-                  <p className="text-xs text-slate-400">{formatDate(s.settledAt)}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{formatDate(s.settledAt)}</p>
                 </div>
               </div>
             ))}

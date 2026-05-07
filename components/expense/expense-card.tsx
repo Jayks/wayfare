@@ -30,21 +30,21 @@ export function ExpenseCard({ expense, members, currentUserId, isAdmin, onDelete
       <CategoryIcon category={expense.category} />
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-700 truncate">{expense.description}</p>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{expense.description}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {payerName} · {dateDisplay}
         </p>
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        <p className="text-base font-semibold text-slate-800 tabular" style={{ fontFamily: "var(--font-fraunces)" }}>
+        <p className="text-base font-semibold text-slate-800 dark:text-slate-100 tabular" style={{ fontFamily: "var(--font-fraunces)" }}>
           {formatCurrency(Number(expense.amount), expense.currency)}
         </p>
         {canEdit && (
           <>
             <Link
               href={`/trips/${expense.tripId}/expenses/${expense.id}/edit`}
-              className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
+              className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 flex items-center justify-center transition-colors"
             >
               <Pencil className="w-3.5 h-3.5" />
             </Link>
