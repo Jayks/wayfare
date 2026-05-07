@@ -159,7 +159,8 @@ export function AddExpenseForm({ trip, members }: Props) {
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">Currency</label>
           <input
             {...register("currency")}
-            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            readOnly
+            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 cursor-default select-none"
           />
         </div>
       </div>

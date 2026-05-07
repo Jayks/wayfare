@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import type { Trip } from "@/lib/db/schema/trips";
 import { formatDate } from "@/lib/utils";
 import { TripCardShareButtons } from "./trip-card-share-buttons";
@@ -57,10 +57,6 @@ export function TripCard({ trip, memberCount }: TripCardProps) {
           {memberCount} {memberCount === 1 ? "member" : "members"}
         </div>
         <div className="flex items-center gap-1">
-          <span className="flex items-center gap-1 text-xs font-medium text-cyan-600 mr-1">
-            <MapPin className="w-3 h-3" />
-            {trip.defaultCurrency}
-          </span>
           <TripCardShareButtons url={summaryUrl} tripName={trip.name} />
         </div>
       </div>

@@ -50,7 +50,7 @@ export function CoverPhotoPicker({ value, onChange }: CoverPhotoPickerProps) {
         tabIndex={0}
         onClick={() => setOpen(true)}
         onKeyDown={(e) => e.key === "Enter" && setOpen(true)}
-        className="w-full h-36 rounded-xl border-2 border-dashed border-slate-200 hover:border-cyan-400 transition-colors overflow-hidden relative group cursor-pointer"
+        className="w-full h-36 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-cyan-400 dark:hover:border-cyan-500 transition-colors overflow-hidden relative group cursor-pointer"
       >
         {value ? (
           <>
@@ -68,7 +68,7 @@ export function CoverPhotoPicker({ value, onChange }: CoverPhotoPickerProps) {
             </button>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
+          <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400 dark:text-slate-500">
             <ImageIcon className="w-7 h-7" />
             <span className="text-sm">Add cover photo</span>
           </div>
@@ -76,21 +76,21 @@ export function CoverPhotoPicker({ value, onChange }: CoverPhotoPickerProps) {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="glass border-white/70 max-w-2xl p-0 overflow-hidden">
-          <div className="p-4 border-b border-slate-100">
-            <h3 className="text-slate-800 font-semibold mb-3" style={{ fontFamily: "var(--font-fraunces)" }}>
+        <DialogContent className="glass border-white/70 dark:border-slate-700/60 max-w-2xl p-0 overflow-hidden">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+            <h3 className="text-slate-800 dark:text-slate-100 font-semibold mb-3" style={{ fontFamily: "var(--font-fraunces)" }}>
               Choose a cover photo
             </h3>
             {/* No <form> wrapper — avoids bubbling into the parent trip form */}
             <div className="flex gap-2">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   placeholder="Search landscapes, cities, travel..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
               <button
@@ -108,7 +108,7 @@ export function CoverPhotoPicker({ value, onChange }: CoverPhotoPickerProps) {
             {isPending ? (
               <div className="grid grid-cols-3 gap-2">
                 {Array.from({ length: 9 }).map((_, i) => (
-                  <div key={i} className="h-28 rounded-lg bg-slate-100 animate-pulse" />
+                  <div key={i} className="h-28 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
                 ))}
               </div>
             ) : (
@@ -132,10 +132,10 @@ export function CoverPhotoPicker({ value, onChange }: CoverPhotoPickerProps) {
               </div>
             )}
             {!isPending && photos.length === 0 && (
-              <p className="text-center text-slate-400 text-sm py-8">No photos found. Try a different search.</p>
+              <p className="text-center text-slate-400 dark:text-slate-500 text-sm py-8">No photos found. Try a different search.</p>
             )}
             {photos.length > 0 && (
-              <p className="text-center text-slate-400 text-xs mt-3">
+              <p className="text-center text-slate-400 dark:text-slate-500 text-xs mt-3">
                 Photos by{" "}
                 <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="underline">
                   Unsplash
