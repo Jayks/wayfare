@@ -35,6 +35,7 @@ Wayfare is a group expense tracking app built for trips. Log what each person pa
 - Minimum-transaction algorithm — at most `n-1` payments for `n` members
 - "Mark as paid" records a settlement and updates balances instantly
 - **UPI payment link** — "Pay UPI" button on rows where you owe money; enter recipient's UPI ID and tap Open to launch PhonePe/GPay/Paytm pre-filled
+- **WhatsApp reminder** — "Remind" button on rows where someone owes you; opens WhatsApp with a pre-filled message including amount and settle link
 - Full settlement history with delete
 - "How is this calculated?" collapsible 3-step breakdown
 - Per-member debt view: who owes whom, down to the rupee
@@ -50,6 +51,7 @@ Wayfare is a group expense tracking app built for trips. Log what each person pa
 - Supabase Realtime — changes appear for all members without refresh
 - Member avatars with deterministic colour initials
 - Real names from Google OAuth stored at join time
+- **Dark mode** — full dark theme with Sun/Moon toggle in nav; persists to `localStorage`, defaults to OS preference
 
 ---
 

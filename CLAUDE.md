@@ -52,6 +52,7 @@ The name plays on *wayfarer* (a traveler) and *fare* (the cost of a journey).
 | Forms | **react-hook-form** + @hookform/resolvers | 7.x | zodResolver only |
 | Toasts | **sonner** | 2.x | |
 | Date utils | **date-fns** | 4.x | |
+| Theme | **next-themes** | 0.4.x | Dark/light toggle — `ThemeProvider` in root layout, `ThemeToggle` in nav |
 | Deployment | **Vercel** | — | |
 
 **Additional dev tools**: `tsx` (run scripts), `dotenv` (drizzle.config env loading), `vitest` (unit tests).
@@ -307,9 +308,42 @@ Never use `bg-primary` on gradient buttons — it conflicts. Use the gradient ut
 - Collapsible panels: height + opacity via `AnimatePresence` + `motion.div`
 - No bouncy springs. No parallax. No animated gradients.
 
+### Dark mode
+
+Dark mode is fully implemented via `next-themes` with `attribute="class"` on `<html>`. Persists to `localStorage`, defaults to OS preference.
+
+**CSS tokens** — `.dark {}` block in `globals.css` overrides all shadcn semantic variables:
+- Background: `#0F172A`, foreground: `#E2E8F0`, card: `#1E293B`
+- Primary: `#22D3EE` (cyan-400, brighter for dark bg)
+- Border: `#334155`, input: `#334155`
+
+**Dark glass utilities** — appended to `globals.css`:
+```css
+.dark .glass     { background: rgba(15,23,42,0.75); border: 1px solid rgba(51,65,85,0.6); }
+.dark .glass-sm  { background: rgba(15,23,42,0.65); }
+.dark .glass-nav { background: rgba(15,23,42,0.85); }
+```
+
+**Dark body gradient** — also in `globals.css`:
+```css
+.dark body { background: linear-gradient(135deg, #0F172A 0%, #0C1520 35%, #0A1A18 70%, #0B1F15 100%); }
+```
+
+**ThemeToggle** — `components/shared/theme-toggle.tsx`. Uses `useTheme` + `mounted` guard to prevent hydration flash. Placed in `AppNav` (between nav links and avatar) and fixed top-right on the login and landing pages.
+
+**Hero section overlay** (`app/page.tsx`) — uses two `<div>`s: one `dark:hidden` (light gradient) and one `hidden dark:block` (dark slate gradient). Required because the hero background is a photo with a near-opaque overlay — without this, dark: text classes would be invisible against the still-light overlay.
+
+**Convention for dark mode in components**:
+- Labels: `text-slate-700 dark:text-slate-200`
+- Body text: `text-slate-500 dark:text-slate-400`
+- Muted text: `text-slate-400 dark:text-slate-300` (go LIGHTER, not darker)
+- Inputs: `border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100`
+- Read-only inputs: `bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 cursor-default`
+- Light badges (e.g. `bg-emerald-100`): `dark:bg-emerald-900/30 dark:text-emerald-400`
+
 ### Navigation
 
-- **Desktop**: Sticky top nav with logo, Trips + Insights links (active state: cyan pill), avatar dropdown
+- **Desktop**: Sticky top nav with logo, Trips + Insights links (active state: cyan pill), ThemeToggle, avatar dropdown
 - **Mobile**: Fixed bottom nav (`MobileNav`) with Trips + Insights icons. Content gets `pb-24` on mobile.
 
 ---
@@ -461,7 +495,8 @@ wayfare/
 │       ├── confirm-dialog.tsx      # "use client" — replaces browser confirm()
 │       ├── member-avatar.tsx       # deterministic gradient initials
 │       ├── mobile-nav.tsx          # "use client" — bottom nav
-│       └── realtime-refresh.tsx    # "use client" — mounts useTripRealtime
+│       ├── realtime-refresh.tsx    # "use client" — mounts useTripRealtime
+│       └── theme-toggle.tsx        # "use client" — Sun/Moon dark mode toggle (next-themes)
 ├── hooks/
 │   ├── use-trip-realtime.ts        # Supabase Realtime → router.refresh()
 │   ├── use-warn-before-leave.ts    # beforeunload on dirty forms
@@ -593,8 +628,10 @@ alter publication supabase_realtime add table trip_members;
 
 ### Settlement
 - UPI payment deep link (`upi://pay?...`) on the settle page — only shown on rows where the current user is the payer; inline UPI ID input → opens PhonePe/GPay/Paytm pre-filled
+- WhatsApp debt reminder — `wa.me/?text=...` link on rows where current user is payee; pre-filled message with amount and trip name
 
 ### UX
+- **Dark mode** — full dark theme via next-themes; Sun/Moon toggle in nav and login/landing pages; persists to localStorage, defaults to OS preference
 - Glassmorphic design: frosted cards, gradient blobs, cyan/teal palette
 - Mobile bottom nav + desktop top nav with active states
 - Loading skeletons (Next.js `loading.tsx`) on all major pages
@@ -630,6 +667,7 @@ alter publication supabase_realtime add table trip_members;
 - **Fraunces font**: apply via `style={{ fontFamily: "var(--font-fraunces)" }}` — NOT a Tailwind class.
 - **Expense date defaults**: use `smartDefaultDate(trip.startDate, trip.endDate)` from `lib/utils.ts` — never hardcode `new Date().toISOString().split("T")[0]`. Logic: ongoing trip → today; trip not started or finished → start date.
 - **revalidatePath after mutations**: always use `revalidatePath('/trips/${tripId}', 'layout')` — not a page-specific path. Expenses affect settle, insights, and the dashboard; the layout variant invalidates the whole subtree at once.
+- **Dark mode classes**: every hardcoded slate/colour text and bg must have a `dark:` counterpart. See Section 6 for the convention. Never add `dark:text-slate-500` to something that was `text-slate-400` — that goes darker (wrong direction). Always go lighter: `text-slate-400 dark:text-slate-300`.
 
 ---
 
