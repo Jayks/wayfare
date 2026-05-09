@@ -319,7 +319,7 @@ wayfare/
 │   ├── insights/trip-insights.ts + all-trips-insights.ts
 │   ├── validations/trip.ts + expense.ts
 │   ├── categories.ts, unsplash.ts, utils.ts
-├── scripts/ (seed-test, seed-temple-tour, verify-seed, take-screenshots, generate-manual-pdf)
+├── scripts/ (seed-test, seed-temple-tour, take-screenshots, generate-manual-pdf)
 ├── drizzle/policies.sql
 ├── public/docs/ (wayfare-user-manual.html, screenshots/)
 ├── drizzle.config.ts, proxy.ts
