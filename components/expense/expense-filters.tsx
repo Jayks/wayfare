@@ -5,7 +5,7 @@ import { Search, X, ChevronDown } from "lucide-react";
 import type { Expense } from "@/lib/db/schema/expenses";
 import type { TripMember } from "@/lib/db/schema/trip-members";
 import { CATEGORIES } from "@/lib/categories";
-import { ExpenseCard } from "./expense-card";
+import { SwipeableExpenseCard } from "./swipeable-expense-card";
 import { formatCurrency, getMemberName } from "@/lib/utils";
 import { CategoryIcon } from "./category-icon";
 
@@ -218,7 +218,7 @@ export function ExpenseFilters({ expenses, members, currentUserId, isAdmin, curr
       ) : (
         <div className="space-y-2">
           {filtered.map((expense) => (
-            <ExpenseCard
+            <SwipeableExpenseCard
               key={expense.id}
               expense={expense}
               members={members}

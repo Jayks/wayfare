@@ -56,8 +56,8 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
           </span>
         </Link>
 
-        {/* Nav links — icon only on mobile, icon + label on desktop */}
-        <nav className="flex items-center gap-1">
+        {/* Nav links — hidden on mobile (bottom nav handles it), icon + label on desktop */}
+        <nav className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map(({ href, label, icon: Icon, tourId }) => {
             const active = pathname === href || pathname.startsWith(href + "/");
             return (

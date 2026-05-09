@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   title: "Wayfare — Travel together. Settle easy.",
   description:
     "Group expense tracking for trips. Log what you spent, who paid, and let Wayfare figure out who owes whom.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

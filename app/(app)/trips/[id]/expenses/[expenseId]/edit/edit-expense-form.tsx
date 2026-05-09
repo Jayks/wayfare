@@ -108,13 +108,13 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
 
       {/* Description */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
           Description <span className="text-red-400">*</span>
         </label>
         <input
           {...register("description")}
           placeholder="e.g. Dinner at Thalassa"
-          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-400"
+          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
         />
         {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>}
       </div>
@@ -122,7 +122,7 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
       {/* Amount + Currency */}
       <div className="grid grid-cols-3 gap-3">
         <div className="col-span-2">
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
             Amount <span className="text-red-400">*</span>
           </label>
           <input
@@ -131,25 +131,26 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
             inputMode="decimal"
             min="0"
             step="0.01"
-            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 tabular"
+            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 tabular"
           />
           {errors.amount && <p className="mt-1 text-xs text-red-500">{errors.amount.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Currency</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">Currency</label>
           <input
             {...register("currency")}
-            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            readOnly
+            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 cursor-default select-none"
           />
         </div>
       </div>
 
       {/* Category */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Category</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">Category</label>
         <select
           {...register("category")}
-          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
         >
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>{c.label}</option>
@@ -160,7 +161,7 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
       {/* Date + Paid by */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
             {category === "accommodation" ? "Check-in" : "Date"}
           </label>
           <input
@@ -168,15 +169,15 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
             type="date"
             min={trip.startDate ?? undefined}
             max={trip.endDate ?? undefined}
-            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           />
           {errors.expenseDate && <p className="mt-1 text-xs text-red-500">{errors.expenseDate.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Paid by</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">Paid by</label>
           <select
             {...register("paidByMemberId")}
-            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             {members.map((m) => (
               <option key={m.id} value={m.id}>{getMemberName(m)}</option>
@@ -188,13 +189,13 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
       {/* Check-out date — accommodation only */}
       {category === "accommodation" && (
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Check-out</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">Check-out</label>
           <input
             {...register("endDate")}
             type="date"
             min={trip.startDate ?? undefined}
             max={trip.endDate ?? undefined}
-            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           />
           {errors.endDate && <p className="mt-1 text-xs text-red-500">{errors.endDate.message}</p>}
         </div>
@@ -202,7 +203,7 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
 
       {/* Split editor — pre-populated */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Split</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">Split</label>
         <SplitEditor
           members={members}
           amount={amount}
@@ -218,11 +219,11 @@ export function EditExpenseForm({ trip, members, expense, splits }: Props) {
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">Notes</label>
         <textarea
           {...register("notes")}
           rows={2}
-          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 resize-none placeholder:text-slate-400"
+          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
         />
       </div>
 

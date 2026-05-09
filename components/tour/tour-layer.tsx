@@ -54,7 +54,14 @@ export function TourLayer({ step, stepIndex, totalSteps, onNext, onPrev, onSkip 
     if (!step.target) return;
 
     const measure = () => {
-      const el = document.querySelector(step.target!);
+      // Pick the first element matching the selector that is actually visible
+      // (non-zero size). This handles data-tour attrs on both top-nav and
+      // bottom-nav where one is display:none depending on breakpoint.
+      const candidates = Array.from(document.querySelectorAll(step.target!));
+      const el = candidates.find((c) => {
+        const r = c.getBoundingClientRect();
+        return r.width > 0 || r.height > 0;
+      });
       if (!el) { setTimeout(measure, 100); return; }
       el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "center" });
       requestAnimationFrame(() => {

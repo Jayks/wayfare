@@ -215,7 +215,7 @@ export function AddExpenseForm({ trip, members }: Props) {
             type="date"
             min={trip.startDate ?? undefined}
             max={trip.endDate ?? undefined}
-            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           />
           {errors.endDate && <p className="mt-1 text-xs text-red-500">{errors.endDate.message}</p>}
         </div>
