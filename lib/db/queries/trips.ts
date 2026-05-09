@@ -25,8 +25,9 @@ export async function getTrips() {
     .innerJoin(tripMembers, eq(trips.id, tripMembers.tripId))
     .where(and(eq(tripMembers.userId, user.id), eq(trips.isArchived, false)))
     .groupBy(trips.id)
-    // Upcoming trips first (nearest date), then past/undated by most recent
+    // Demo trip pinned first, then upcoming by nearest date, then past/undated by recency
     .orderBy(
+      sql`case when ${trips.isDemo} then 0 else 1 end`,
       sql`case when ${trips.startDate} >= current_date then 0 else 1 end`,
       sql`case when ${trips.startDate} >= current_date then ${trips.startDate} end asc`,
       sql`case when ${trips.startDate} < current_date or ${trips.startDate} is null then ${trips.createdAt} end desc`

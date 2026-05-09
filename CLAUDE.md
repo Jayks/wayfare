@@ -1,84 +1,62 @@
 # CLAUDE.md — Wayfare
 
-> This file is the source of truth for Claude Code. Read it fully before any task. It reflects the **actual built state** of the project — not the original spec. When in doubt, ask before assuming.
+> Source of truth for Claude Code. Reflects actual built state. When in doubt, ask.
 
 ---
 
 ## 1. Project Overview
 
-**Wayfare** is a group expense tracking web app for trips and tours. Multiple people in a group log what they spent, who it was for, and the app computes who owes whom — with the minimum number of transactions. Inspired by Splitwise, but designed specifically for trips.
+**Wayfare** — group expense tracking for trips. Members log expenses, app computes minimum-transaction settlements. Deployed on Vercel + Supabase (free tier).
 
-The name plays on *wayfarer* (a traveler) and *fare* (the cost of a journey).
-
-**Primary use case**: Family/friends travel together. One person pays for dinner, another for the cab, a third for hotel. At the end of the trip, everyone sees a clean settlement with the fewest possible payments.
-
-**Production goal**: Vercel + Supabase, free tier only.
-
----
-
-## 1a. Brand
-
-**Name**: Wayfare
 **Tagline**: *Travel together. Settle easy.*
-
-### Logo & Favicon
-
-- **Compass mark** chosen — compass rose icon (Lucide `Compass`) in a cyan-to-teal gradient badge alongside "Wayfare" wordmark in Fraunces.
-- **Favicon**: `app/icon.tsx` — Next.js ImageResponse generating "W" in terracotta on cream, rounded square.
-
-### Design direction
-
-**Glassmorphic**, not warm/editorial. The initial spec called for terracotta/sand/forest tones; this was revised during build to a vibrant **cyan/teal** palette with frosted-glass cards, background gradient blobs, and strong colour gradients on interactive elements.
+**Design**: Glassmorphic, cyan/teal palette, frosted-glass cards.
 
 ---
 
 ## 2. Tech Stack (LOCKED — do not substitute without asking)
 
-| Layer | Choice | Version | Notes |
-|---|---|---|---|
-| Framework | **Next.js** (App Router, TypeScript) | 16.x | Scaffolded with create-next-app; upgraded from spec's v15 |
-| Styling | **Tailwind CSS v4** | 4.x | CSS-first config, no tailwind.config.ts |
-| UI components | **shadcn/ui** | latest | Uses **@base-ui/react** (not Radix) — see gotchas |
-| Animation | **Framer Motion** | 12.x | Subtle only |
-| Charts | **Recharts** | 3.x | Insights pages only |
-| Icons | **lucide-react** | latest | |
-| QR codes | **qrcode.react** | latest | Invite QR dialogs |
-| AI | **@anthropic-ai/sdk** | 0.94.x | Expense parser + trip narrative (claude-haiku-4-5-20251001) |
-| Database | **Supabase Postgres** | — | Free tier |
-| Auth | **Supabase Auth** (Google OAuth) | — | @supabase/ssr v0.6 |
-| Realtime | **Supabase Realtime** | — | postgres_changes → router.refresh() |
-| ORM | **Drizzle** | 0.43.x | drizzle-kit 0.31.x |
-| Validation | **Zod** | 3.x | |
-| Forms | **react-hook-form** + @hookform/resolvers | 7.x | zodResolver only |
-| Toasts | **sonner** | 2.x | |
-| Date utils | **date-fns** | 4.x | |
-| Theme | **next-themes** | 0.4.x | Dark/light toggle — `ThemeProvider` in root layout, `ThemeToggle` in nav |
-| Deployment | **Vercel** | — | |
+| Layer | Choice | Notes |
+|---|---|---|
+| Framework | Next.js 16 (App Router, TypeScript) | |
+| Styling | Tailwind CSS v4 | CSS-first config, no tailwind.config.ts |
+| UI | shadcn/ui | Uses **@base-ui/react** (not Radix) — see gotchas |
+| Animation | Framer Motion 12 | Subtle only |
+| Charts | Recharts 3 | Insights pages only |
+| Icons | lucide-react | |
+| QR | qrcode.react | |
+| AI | @anthropic-ai/sdk 0.94 | claude-haiku-4-5-20251001 |
+| Database | Supabase Postgres | Free tier |
+| Auth | Supabase Auth (Google OAuth) | @supabase/ssr v0.6 |
+| Realtime | Supabase Realtime | postgres_changes → router.refresh() |
+| ORM | Drizzle 0.43 / drizzle-kit 0.31 | |
+| Validation | Zod 3 | |
+| Forms | react-hook-form 7 + zodResolver | |
+| Toasts | sonner 2 | |
+| Date utils | date-fns 4 | |
+| Theme | next-themes 0.4 | ThemeProvider in root layout |
+| Deployment | Vercel | |
 
-**Additional dev tools**: `tsx` (run scripts), `dotenv` (drizzle.config env loading), `vitest` (unit tests), `puppeteer-core` (screenshot automation + PDF generation for user manual).
+**Dev tools**: `tsx`, `dotenv`, `vitest`, `puppeteer-core`
 
 **Do NOT add**: NextAuth, Prisma, Redux, MUI, Chakra, Bootstrap, styled-components, tRPC, Pusher/Ably.
 
-**TanStack Query** is installed but **not wired for data fetching**. Realtime is handled via `router.refresh()`, not query invalidation. Do not add QueryClientProvider unless explicitly requested.
+**TanStack Query** is installed but not wired. Do not add QueryClientProvider unless requested.
 
 ---
 
-## 3. Critical Gotchas (read before touching UI)
+## 3. Critical Gotchas
 
 ### shadcn/ui uses @base-ui/react, NOT Radix
 
-The shadcn version installed uses `@base-ui/react` primitives. This has important API differences:
+- **No `asChild` prop** — use `render` prop instead: `<Button render={<Link href="..." />}>`
+- Button as Link needs `nativeButton={false}`: `<Button render={<Link href="..." />} nativeButton={false}>`
+- Prefer plain styled `<Link>` for nav buttons to avoid nativeButton complexity
 
-- **No `asChild` prop** on Button or DropdownMenuTrigger
-- Use the **`render` prop** instead: `<Button render={<Link href="..." />}>`
-- When rendering a Button as a `<Link>` (which renders as `<a>`), you MUST add `nativeButton={false}`: `<Button render={<Link href="..." />} nativeButton={false}>`
-- **Prefer using plain styled `<Link>` elements** for navigation buttons to avoid the nativeButton complexity entirely
+### CoverPhotoPicker — no `<form>` inside forms
 
-### CoverPhotoPicker — no `<form>` wrapper inside forms
+Search uses `<div>` (not `<form>`) with `type="button"` on the search button to prevent parent form submission.
 
-The cover photo picker's search lives inside the parent trip form. The search must use a `<div>` (not `<form>`) with `type="button"` on the search button to prevent event bubbling that submits the parent form.
-
-### DB Singleton pattern (prevents HMR connection exhaustion)
+### DB Singleton (prevents HMR connection exhaustion)
 
 ```typescript
 // lib/db/client.ts
@@ -87,51 +65,43 @@ const client = globalThis._pgClient ?? postgres(connectionString, { prepare: fal
 if (process.env.NODE_ENV !== 'production') globalThis._pgClient = client;
 ```
 
-Without this, each Next.js hot-reload creates a new connection pool, exhausting Supabase free-tier connection slots.
+### proxy.ts (Next.js 16)
 
-### proxy.ts (Next.js 16 convention)
+Next.js 16 renamed `middleware.ts` → `proxy.ts` with a `proxy` export (not `middleware`).
 
-Next.js 16 renamed `middleware.ts` → `proxy.ts` with a `proxy` function export (not `middleware`). The session refresh lives in `proxy.ts`.
+### Supabase publishable key
 
-### Supabase publishable key format
-
-The project uses the new Supabase `sb_publishable_*` key format for `NEXT_PUBLIC_SUPABASE_ANON_KEY`. This is equivalent to the old `anon` JWT format — @supabase/ssr handles both.
+Uses new `sb_publishable_*` format for `NEXT_PUBLIC_SUPABASE_ANON_KEY` — @supabase/ssr handles it.
 
 ### Drizzle config needs dotenv
 
-`drizzle.config.ts` must explicitly call `config({ path: ".env.local" })` from `dotenv` because drizzle-kit does not always auto-load `.env.local` on Windows. Install dotenv as a dev dep.
+`drizzle.config.ts` must call `config({ path: ".env.local" })` — drizzle-kit doesn't auto-load on Windows.
 
-### Settlement formula (corrected from spec)
+### Settlement formula (corrected)
 
-The CLAUDE.md originally had the signs wrong. **Correct formula:**
 ```
 net = totalPaid - totalOwed + settlementsSent - settlementsReceived
 ```
-- `settlementsSent`: you paid someone → reduces your debt → **adds** to net
-- `settlementsReceived`: someone paid you → your receivable shrinks → **subtracts** from net
+`settlementsSent` adds (reduces debt); `settlementsReceived` subtracts (shrinks receivable).
 
-### Anthropic SDK — instantiate inside the function, not at module level
+### Anthropic SDK — instantiate inside the function
 
 ```typescript
-// ✅ correct — key resolved at call time
+// ✅ correct
 export async function myAction() {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  ...
 }
-
-// ❌ wrong — module evaluated before env vars are available in Next.js server action runtime
+// ❌ wrong — module-level eval before env vars load
 const client = new Anthropic();
-export async function myAction() { ... }
 ```
 
-Also: strip markdown code fences from responses before `JSON.parse` — Haiku wraps JSON in ` ```json ``` ` despite instructions:
+Strip markdown fences before `JSON.parse` — Haiku wraps JSON in ` ```json ``` `:
 ```typescript
 const jsonText = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
 ```
 
-### Trip member count on cards
+### Trip member count — correlated subquery
 
-The `getTrips()` query joins tripMembers with a WHERE on the current user. The COUNT must use a **correlated subquery** to count all members, not just the current user's row:
 ```typescript
 memberCount: sql<number>`(select count(*) from trip_members where trip_members.trip_id = ${trips.id})`
 ```
@@ -140,94 +110,71 @@ memberCount: sql<number>`(select count(*) from trip_members where trip_members.t
 
 ## 4. Architecture Principles
 
-1. **Server-first**: React Server Components by default. `"use client"` only for state, effects, browser APIs, or chart libraries.
-2. **Server Actions for mutations**: `app/actions/*.ts`. No REST API routes for internal CRUD.
-3. **Drizzle is the only DB layer**: Auth and Realtime subscriptions use Supabase JS. All reads/writes use Drizzle.
-4. **RLS everywhere**: All 5 tables have RLS. `drizzle/policies.sql` is the source of truth. Apply via Supabase SQL Editor.
-5. **Pure functions for math**: `lib/splits/compute.ts` and `lib/settle/optimize.ts` are pure, unit-tested, never touch DB.
-6. **Zod schemas shared**: Same schema validates the form (zodResolver), server action input, and DB insert.
-7. **Optimistic UI via useState**: Optimistic deletes use local `removedIds: Set<string>` state, not TanStack Query. Rolls back on server error.
-8. **Realtime via router.refresh()**: `useTripRealtime(tripId)` subscribes to Supabase channels and calls `router.refresh()` on any change. Injected via `app/(app)/trips/[id]/layout.tsx` covering all trip sub-pages.
-9. **Auth checks in every query**: Each `lib/db/queries/*.ts` function verifies the current user and their membership before returning data. No function trusts the caller to have checked.
+1. **Server-first**: RSC by default. `"use client"` only for state, effects, browser APIs, charts.
+2. **Server Actions for mutations**: `app/actions/*.ts`. No REST routes for internal CRUD.
+3. **Drizzle only for DB reads/writes**. Supabase JS only for Auth + Realtime.
+4. **RLS everywhere**: All 5 tables. `drizzle/policies.sql` is the source of truth.
+5. **Pure functions for math**: `lib/splits/compute.ts`, `lib/settle/optimize.ts` — never touch DB.
+6. **Shared Zod schemas**: same schema for form (zodResolver), server action input, and DB insert.
+7. **Optimistic UI via useState**: `removedIds: Set<string>` state, rolls back on server error.
+8. **Realtime via router.refresh()**: `useTripRealtime(tripId)` in `app/(app)/trips/[id]/layout.tsx`.
+9. **Auth checks in every query**: `lib/db/queries/*.ts` verifies user + membership before returning data.
 
 ---
 
-## 5. Database Schema (Drizzle)
+## 5. Database Schema
 
-Schema files in `lib/db/schema/`. RLS policies in `drizzle/policies.sql`.
+Schema files in `lib/db/schema/`. RLS in `drizzle/policies.sql`.
 
 ### trips
 ```
-id: uuid pk default gen_random_uuid()
-name: text not null
-description: text
-cover_photo_url: text
-default_currency: text not null default 'INR'
-start_date: date
-end_date: date
-budget: numeric(12,2)           -- optional trip budget
-itinerary: text                 -- optional trip plan; used by AI narrative + adherence analysis
-is_archived: boolean not null default false
-created_by: uuid not null       -- auth.users.id
-share_token: uuid not null unique default gen_random_uuid()
-created_at: timestamptz default now()
+id, name, description, cover_photo_url
+default_currency: text default 'INR'
+start_date, end_date: date
+budget: numeric(12,2)
+itinerary: text           -- used by AI narrative + adherence
+is_archived: boolean default false
+created_by: uuid          -- auth.users.id
+share_token: uuid unique default gen_random_uuid()
+created_at: timestamptz
 ```
 
 ### trip_members
 ```
-id: uuid pk
-trip_id: uuid fk -> trips (cascade)
-user_id: uuid nullable          -- auth.users.id (real user)
-guest_name: text nullable       -- guest without an account
-display_name: text nullable     -- populated from Google full_name at join time
+id, trip_id fk->trips(cascade)
+user_id: uuid nullable    -- auth.users.id
+guest_name: text nullable -- guest without account
+display_name: text nullable -- from Google full_name
 role: enum('admin','member') default 'member'
-joined_at: timestamptz default now()
-CHECK: exactly one of (user_id, guest_name) must be set
+CHECK: exactly one of (user_id, guest_name)
 UNIQUE: (trip_id, user_id)
 ```
 
 ### expenses
 ```
-id: uuid pk
-trip_id: uuid fk -> trips (cascade)
-paid_by_member_id: uuid fk -> trip_members
-description: text not null
-category: enum('food','accommodation','transport','sightseeing','shopping','activities','groceries','other')
-amount: numeric(12,2) not null
-currency: text not null
-expense_date: date not null
-notes: text
-created_by_user_id: uuid not null
-created_at, updated_at: timestamptz
+id, trip_id fk->trips(cascade), paid_by_member_id fk->trip_members
+description: text, category: enum('food','accommodation','transport','sightseeing','shopping','activities','groceries','other')
+amount: numeric(12,2), currency: text, expense_date: date, notes: text
+created_by_user_id: uuid, created_at, updated_at
 ```
 
 ### expense_splits
 ```
-id: uuid pk
-expense_id: uuid fk -> expenses (cascade)
-member_id: uuid fk -> trip_members
-share_amount: numeric(12,2) not null    -- computed amount
+id, expense_id fk->expenses(cascade), member_id fk->trip_members
+share_amount: numeric(12,2)   -- computed
 split_type: enum('equal','exact','percentage','shares')
-split_value: numeric(12,4)              -- raw input (null for equal)
+split_value: numeric(12,4)    -- raw input (null for equal)
 UNIQUE: (expense_id, member_id)
 ```
 
 ### settlements
 ```
-id: uuid pk
-trip_id: uuid fk -> trips (cascade)
-from_member_id: uuid fk -> trip_members
-to_member_id: uuid fk -> trip_members
-amount: numeric(12,2) not null
-currency: text not null
-note: text
-settled_at: timestamptz default now()
+id, trip_id, from_member_id, to_member_id fk->trip_members
+amount: numeric(12,2), currency, note, settled_at
 CHECK: from_member_id <> to_member_id
 ```
 
-### Realtime — enable on all tables
-
-Run in Supabase SQL Editor after creating tables:
+### Realtime setup (run once in SQL Editor)
 ```sql
 alter publication supabase_realtime add table expenses;
 alter publication supabase_realtime add table expense_splits;
@@ -235,604 +182,236 @@ alter publication supabase_realtime add table settlements;
 alter publication supabase_realtime add table trip_members;
 ```
 
-### display_name backfill (run once after adding column)
-
+### display_name backfill (run once)
 ```sql
-update trip_members
-set display_name = (
-  select raw_user_meta_data->>'full_name'
-  from auth.users
-  where auth.users.id = trip_members.user_id
-)
-where user_id is not null and display_name is null;
+update trip_members set display_name = (
+  select raw_user_meta_data->>'full_name' from auth.users where auth.users.id = trip_members.user_id
+) where user_id is not null and display_name is null;
 ```
 
 ---
 
 ## 6. Design System
 
-### Palette (actual — replaces original terracotta/forest spec)
-
+### Palette
 ```css
-/* Core palette */
---color-cyan-500:   #06B6D4;   /* primary buttons, active states */
---color-teal-500:   #14B8A6;   /* gradient end */
---color-slate-800:  #1E293B;   /* headings */
---color-slate-600:  #475569;   /* body text */
---color-slate-400:  #94A3B8;   /* muted text */
+/* Primary */
+--primary: #0891B2;          /* cyan-600 */
+/* Gradient: from-cyan-500 to-teal-500 (#06B6D4 → #14B8A6) */
+/* Background: linear-gradient(135deg, #EFF6FF, #ECFEFF, #F0FDFA, #ECFDF5) fixed */
 
-/* Semantic (shadcn tokens) */
---primary:          #0891B2;   /* cyan-600 */
---background:       #EFF6FF;   /* blue-50 gradient start */
---card:             #FFFFFF;
-
-/* Category hex (for charts) — in lib/categories.ts */
-food: #EA580C, accommodation: #2563EB, transport: #9333EA,
-sightseeing: #0D9488, shopping: #DB2777, activities: #16A34A,
-groceries: #65A30D, other: #64748B
+/* Category hex (lib/categories.ts) */
+food:#EA580C  accommodation:#2563EB  transport:#9333EA  sightseeing:#0D9488
+shopping:#DB2777  activities:#16A34A  groceries:#65A30D  other:#64748B
 ```
 
-### Body background
-
-Multi-stop fixed gradient + decorative blur blobs in `app/layout.tsx`:
+### Glass utilities (globals.css)
 ```css
-body { background: linear-gradient(135deg, #EFF6FF 0%, #ECFEFF 35%, #F0FDFA 70%, #ECFDF5 100%); background-attachment: fixed; }
-```
-
-### Glass utilities (in globals.css)
-
-```css
-.glass     { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.75); }
-.glass-sm  { background: rgba(255,255,255,0.5); backdrop-filter: blur(12px); }
-.glass-nav { background: rgba(255,255,255,0.72); backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.8); }
+.glass     { background:rgba(255,255,255,0.6); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.75); }
+.glass-sm  { background:rgba(255,255,255,0.5); backdrop-filter:blur(12px); }
+.glass-nav { background:rgba(255,255,255,0.72); backdrop-filter:blur(24px); border-bottom:1px solid rgba(255,255,255,0.8); }
+.dark .glass     { background:rgba(15,23,42,0.75); border:1px solid rgba(51,65,85,0.6); }
+.dark .glass-sm  { background:rgba(15,23,42,0.65); }
+.dark .glass-nav { background:rgba(15,23,42,0.85); }
+.dark body { background:linear-gradient(135deg,#0F172A,#0C1520,#0A1A18,#0B1F15); }
 ```
 
 ### Typography
+- **Headings**: Fraunces via `style={{ fontFamily: "var(--font-fraunces)" }}` — NOT Tailwind class
+- **Body**: Inter via `--font-inter`
+- **Numbers**: `font-variant-numeric: tabular-nums`
 
-- **Headings**: Fraunces (variable axes: opsz, SOFT, WONK). Applied via CSS variable `--font-fraunces` and inline `style={{ fontFamily: "var(--font-fraunces)" }}` (NOT via Tailwind class — apply directly).
-- **Body**: Inter via `--font-inter`.
-- **Numbers**: Always `tabular` class or `font-variant-numeric: tabular-nums`.
-
-### Buttons (gradient pattern)
-
-Primary action buttons use Tailwind gradient utilities directly (NOT a CSS class):
+### Buttons
 ```tsx
 className="bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white"
 ```
-Never use `bg-primary` on gradient buttons — it conflicts. Use the gradient utilities or a plain `<Link>` element styled directly.
+Never `bg-primary` on gradient buttons.
 
-### Motion rules
-
-- Card entrance: `opacity: 0 → 1, y: 8 → 0` over 200ms, stagger 30–50ms per item via `AnimatedList`
-- Balance numbers: count up from 0 via `CountUp` component (Framer Motion animate)
-- Collapsible panels: height + opacity via `AnimatePresence` + `motion.div`
-- No bouncy springs. No parallax. No animated gradients.
-
-### Dark mode
-
-Dark mode is fully implemented via `next-themes` with `attribute="class"` on `<html>`. Persists to `localStorage`, defaults to OS preference.
-
-**CSS tokens** — `.dark {}` block in `globals.css` overrides all shadcn semantic variables:
-- Background: `#0F172A`, foreground: `#E2E8F0`, card: `#1E293B`
-- Primary: `#22D3EE` (cyan-400, brighter for dark bg)
-- Border: `#334155`, input: `#334155`
-
-**Dark glass utilities** — appended to `globals.css`:
-```css
-.dark .glass     { background: rgba(15,23,42,0.75); border: 1px solid rgba(51,65,85,0.6); }
-.dark .glass-sm  { background: rgba(15,23,42,0.65); }
-.dark .glass-nav { background: rgba(15,23,42,0.85); }
-```
-
-**Dark body gradient** — also in `globals.css`:
-```css
-.dark body { background: linear-gradient(135deg, #0F172A 0%, #0C1520 35%, #0A1A18 70%, #0B1F15 100%); }
-```
-
-**ThemeToggle** — `components/shared/theme-toggle.tsx`. Uses `useTheme` + `mounted` guard to prevent hydration flash. Placed in `AppNav` (between nav links and avatar) and fixed top-right on the login and landing pages.
-
-**Hero section overlay** (`app/page.tsx`) — uses two `<div>`s: one `dark:hidden` (light gradient) and one `hidden dark:block` (dark slate gradient). Required because the hero background is a photo with a near-opaque overlay — without this, dark: text classes would be invisible against the still-light overlay.
-
-**Convention for dark mode in components**:
+### Dark mode conventions
 - Labels: `text-slate-700 dark:text-slate-200`
-- Body text: `text-slate-500 dark:text-slate-400`
-- Muted text: `text-slate-400 dark:text-slate-300` (go LIGHTER, not darker)
+- Body: `text-slate-500 dark:text-slate-400`
+- Muted: `text-slate-400 dark:text-slate-300` (always go **lighter** in dark)
 - Inputs: `border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100`
-- Read-only inputs: `bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 cursor-default`
-- Light badges (e.g. `bg-emerald-100`): `dark:bg-emerald-900/30 dark:text-emerald-400`
+- Read-only: `bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 cursor-default`
+- Badges: e.g. `bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400`
+- Dark tokens: bg `#0F172A`, card `#1E293B`, primary `#22D3EE`, border/input `#334155`
 
 ### Navigation
+- **Desktop**: sticky top — logo, Trips, Insights, ThemeToggle, Help (BookOpen → `/docs/wayfare-user-manual.html`), avatar dropdown
+- **Mobile**: icon-only top nav (`hidden md:inline` on labels) + fixed `MobileNav` bottom. Content gets `pb-24`. Help in avatar dropdown.
 
-- **Desktop**: Sticky top nav with logo, Trips + Insights links (active state: cyan pill), ThemeToggle, **Help link** (BookOpen → `/docs/wayfare-user-manual.html`, opens in new tab), avatar dropdown
-- **Mobile**: Top nav shows Trips + Insights as **icon-only** (label `hidden md:inline`). Fixed bottom `MobileNav` also shows them. Help is in the avatar dropdown. Content gets `pb-24` on mobile.
-- **Avatar dropdown** (all screen sizes): Admin (if applicable), Help, Sign out.
+### Motion
+- Card entrance: `opacity 0→1, y 8→0` over 200ms, stagger 30–50ms via `AnimatedList`
+- Balance numbers: `CountUp` (Framer Motion)
+- Collapsible: `AnimatePresence` + `motion.div` height+opacity
+- No bouncy springs, parallax, or animated gradients
 
 ---
 
 ## 7. Key Algorithms
 
-### Split computation (`lib/splits/compute.ts`)
-
-Four modes — all return `SplitResult[]` with `shareAmount` (computed) and `splitValue` (raw input):
-
-| Mode | Input | Validation |
-|---|---|---|
-| `equal` | member IDs | none |
-| `exact` | amount per member | sum must equal total |
-| `percentage` | % per member | must sum to 100 |
-| `shares` | share count per member | total shares > 0 |
-
-Rounding: `Math.round(n * 100) / 100`. Distribute remainder to first row.
-22 Vitest tests — all must pass before any split-related change.
-
-### Settlement optimizer (`lib/settle/optimize.ts`)
-
-Greedy min-transactions algorithm:
-1. For each member: `net = paid - owed + sent - received`
-2. Split into creditors (net > 0) and debtors (net < 0), sort by absolute value desc
-3. Greedily match top creditor with top debtor, transfer `min(creditor, |debtor|)`
-4. Emit transaction, update balances, advance pointers
-
-Produces at most `n-1` transactions. 6 Vitest fixtures.
-
 ### Balance formula
-
 ```typescript
 net = totalPaid - totalOwed + settlementsSent - settlementsReceived
 ```
 
-**Not** `totalPaid - totalOwed - settlementsSent + settlementsReceived` — the signs were corrected during build.
+### Split computation (`lib/splits/compute.ts`)
+Four modes returning `SplitResult[]` with `shareAmount` + `splitValue`:
+- `equal`: divide evenly among member IDs
+- `exact`: amount per member (must sum to total)
+- `percentage`: % per member (must sum to 100)
+- `shares`: share count per member (total > 0)
+
+Rounding: `Math.round(n * 100) / 100`. Remainder to first row. **22 Vitest tests — all must pass.**
+
+### Settlement optimizer (`lib/settle/optimize.ts`)
+Greedy: split members into creditors/debtors by net, sort desc, match top pairs, emit min transactions. **6 Vitest fixtures.**
 
 ---
 
-## 8. Project Structure (actual)
+## 8. Project Structure
 
 ```
 wayfare/
 ├── app/
-│   ├── icon.tsx                    # favicon via ImageResponse
-│   ├── error.tsx                   # global error boundary
-│   ├── not-found.tsx               # custom 404
-│   ├── layout.tsx                  # root layout: fonts, blobs, Toaster
-│   ├── page.tsx                    # redirects → /trips or /login
-│   ├── globals.css                 # Tailwind v4, design tokens, glass utils
-│   ├── (auth)/login/
-│   │   ├── page.tsx
-│   │   └── login-form.tsx          # "use client" — Google OAuth button
-│   ├── auth/callback/route.ts      # Supabase code exchange
+│   ├── icon.tsx, error.tsx, not-found.tsx, layout.tsx, page.tsx, globals.css
+│   ├── (auth)/login/page.tsx + login-form.tsx
+│   ├── auth/callback/route.ts
 │   ├── (app)/
-│   │   ├── layout.tsx              # auth check + MobileNav
-│   │   ├── error.tsx               # app-level error boundary
-│   │   ├── app-nav.tsx             # "use client" — top nav with active states
-│   │   ├── insights/
-│   │   │   ├── page.tsx            # all-trips insights
-│   │   │   └── loading.tsx
+│   │   ├── layout.tsx, error.tsx, app-nav.tsx
+│   │   ├── insights/page.tsx + loading.tsx
 │   │   └── trips/
-│   │       ├── page.tsx            # trips list (active + archived)
-│   │       ├── loading.tsx
-│   │       ├── new/
-│   │       │   ├── page.tsx
-│   │       │   └── create-trip-form.tsx
+│   │       ├── page.tsx, loading.tsx
+│   │       ├── new/page.tsx + create-trip-form.tsx
 │   │       └── [id]/
-│   │           ├── layout.tsx      # injects RealtimeRefresh
-│   │           ├── page.tsx        # trip dashboard
-│   │           ├── edit/
-│   │           │   ├── page.tsx
-│   │           │   └── edit-trip-form.tsx
-│   │           ├── expenses/
-│   │           │   ├── page.tsx    # expense list with filters
-│   │           │   ├── loading.tsx
-│   │           │   └── new/
-│   │           │       ├── page.tsx
-│   │           │       └── add-expense-form.tsx
-│   │           │   └── [expenseId]/edit/
-│   │           │       ├── page.tsx
-│   │           │       └── edit-expense-form.tsx
-│   │           ├── members/
-│   │           │   ├── page.tsx
-│   │           │   ├── add-guest-form.tsx
-│   │           │   ├── remove-member-button.tsx
-│   │           │   └── regenerate-token-button.tsx
-│   │           ├── settle/
-│   │           │   ├── page.tsx
-│   │           │   ├── loading.tsx
-│   │           │   ├── mark-paid-button.tsx
-│   │           │   └── upi-pay-button.tsx  # "use client" — UPI deep link (shown only when current user owes)
-│   │           └── insights/
-│   │               ├── page.tsx
-│   │               └── loading.tsx
-│   ├── join/[token]/
-│   │   ├── page.tsx
-│   │   └── join-button.tsx
-│   ├── summary/[token]/
-│   │   ├── page.tsx            # public shareable trip summary (no auth required)
-│   │   └── opengraph-image.tsx # OG image 1200×630
-│   ├── api/
-│   │   └── trips/[id]/export/route.ts  # GET → CSV download (auth-guarded)
+│   │           ├── layout.tsx (RealtimeRefresh), page.tsx
+│   │           ├── edit/page.tsx + edit-trip-form.tsx
+│   │           ├── expenses/page.tsx, loading.tsx, new/, [expenseId]/edit/
+│   │           ├── members/page.tsx + forms/buttons
+│   │           ├── settle/page.tsx, loading.tsx, mark-paid-button, upi-pay-button
+│   │           └── insights/page.tsx + loading.tsx
+│   ├── join/[token]/page.tsx + join-button.tsx
+│   ├── summary/[token]/page.tsx + opengraph-image.tsx
+│   ├── api/trips/[id]/export/route.ts    # CSV download
 │   └── actions/
-│       ├── trips.ts        # createTrip, updateTrip, deleteTrip, archiveTrip, regenerateShareToken
-│       ├── expenses.ts     # addExpense, updateExpense, deleteExpense, duplicateExpense
-│       ├── members.ts      # addGuestMember, removeMember, joinTrip
-│       ├── settlements.ts  # recordSettlement, deleteSettlement
-│       ├── unsplash.ts     # searchUnsplash (server action wrapping the API)
-│       ├── parse-expense.ts  # parseExpenseWithAI — Claude Haiku expense parser
-│       ├── narrative.ts      # generateTripNarrative — Claude Haiku trip story generator
-│       ├── trip-adherence.ts # analyzeTripAdherence — plan vs reality comparison
-│       └── parse-chat.ts     # parseChatExpenses — bulk extract expenses from chat text
+│       ├── trips.ts, expenses.ts, members.ts, settlements.ts, unsplash.ts
+│       ├── parse-expense.ts, narrative.ts, trip-adherence.ts, parse-chat.ts
 ├── components/
-│   ├── ui/                 # shadcn primitives (base-ui)
-│   ├── expense/
-│   │   ├── expense-card.tsx
-│   │   ├── expense-filters.tsx     # "use client" — search/filter/sort
-│   │   ├── split-editor.tsx        # "use client" — 4-mode splitter
-│   │   ├── quick-add-bar.tsx       # "use client" — AI/rule-based/voice quick-add parser
-│   │   ├── chat-import-dialog.tsx  # "use client" — paste chat → bulk extract & add expenses
-│   │   ├── category-icon.tsx
-│   │   ├── delete-expense-button.tsx
-│   │   └── duplicate-expense-button.tsx
-│   ├── trip/
-│   │   ├── trip-card.tsx           # server — cover links to trip; footer has share buttons
-│   │   ├── trip-card-share-buttons.tsx  # "use client" — Web Share API + QR dialog
-│   │   ├── cover-photo-picker.tsx  # "use client" — Unsplash dialog
-│   │   ├── budget-bar.tsx          # spend vs budget progress
-│   │   ├── qr-invite.tsx           # "use client" — QR code dialog + copy link
-│   │   ├── summary-share-button.tsx # "use client" — Web Share API share button
-│   │   ├── narrative-section.tsx   # "use client" — AI trip story generator
-│   │   └── adherence-card.tsx      # "use client" — plan vs reality insight card
-│   ├── settlement/
-│   │   ├── settlement-breakdown.tsx    # "How is this calculated?" collapsible
-│   │   └── member-debt-breakdown.tsx   # "use client" — per-member debt view
-│   ├── insights/
-│   │   ├── kpi-card.tsx            # animated via CountUp
-│   │   ├── smart-insight-card.tsx
-│   │   ├── category-donut.tsx      # "use client" — Recharts
-│   │   ├── daily-spend-bar.tsx     # "use client" — Recharts
-│   │   ├── member-contributions.tsx # "use client" — Recharts
-│   │   └── trips-spend-bar.tsx     # "use client" — Recharts
-│   └── shared/
-│       ├── skeleton.tsx
-│       ├── animated-list.tsx       # "use client" — Framer Motion stagger
-│       ├── count-up.tsx            # "use client" — animated number
-│       ├── confirm-dialog.tsx      # "use client" — replaces browser confirm()
-│       ├── member-avatar.tsx       # deterministic gradient initials
-│       ├── mobile-nav.tsx          # "use client" — bottom nav
-│       ├── realtime-refresh.tsx    # "use client" — mounts useTripRealtime
-│       └── theme-toggle.tsx        # "use client" — Sun/Moon dark mode toggle (next-themes)
+│   ├── ui/                              # shadcn/base-ui primitives
+│   ├── expense/  (expense-card, expense-filters, split-editor, quick-add-bar, chat-import-dialog, ...)
+│   ├── trip/     (trip-card, cover-photo-picker, budget-bar, qr-invite, narrative-section, adherence-card, ...)
+│   ├── settlement/ (settlement-breakdown, member-debt-breakdown)
+│   ├── insights/ (kpi-card, category-donut, daily-spend-bar, member-contributions, trips-spend-bar, ...)
+│   └── shared/   (skeleton, animated-list, count-up, confirm-dialog, member-avatar, mobile-nav, realtime-refresh, theme-toggle)
 ├── hooks/
-│   ├── use-trip-realtime.ts        # Supabase Realtime → router.refresh()
-│   ├── use-warn-before-leave.ts    # beforeunload on dirty forms
-│   └── use-speech-recognition.ts  # Web Speech API — mic input for quick-add bar
+│   ├── use-trip-realtime.ts, use-warn-before-leave.ts, use-speech-recognition.ts
 ├── lib/
-│   ├── db/
-│   │   ├── client.ts               # Drizzle + globalThis singleton
-│   │   ├── schema/
-│   │   │   ├── trips.ts
-│   │   │   ├── trip-members.ts
-│   │   │   ├── expenses.ts
-│   │   │   ├── expense-splits.ts
-│   │   │   └── settlements.ts
-│   │   └── queries/
-│   │       ├── trips.ts            # getTrips, getArchivedTrips, getTripWithMembers, getTripByToken
-│   │       ├── expenses.ts         # getExpenses, getExpenseWithSplits, getTripExpensesWithSplits
-│   │       ├── balances.ts         # getBalances (net per member), getSettlements
-│   │       ├── insights.ts         # getAllTripsInsightsData
-│   │       └── meta.ts             # getTripName (React.cache for generateMetadata)
-│   ├── supabase/
-│   │   ├── server.ts               # createServerClient (RSC / server actions)
-│   │   ├── client.ts               # createBrowserClient
-│   │   └── admin.ts                # service-role client (for admin tasks)
-│   ├── parser/
-│   │   └── parse-expense.ts        # parseExpenseText — pure rule-based parser + ParsedExpense type
-│   ├── splits/
-│   │   ├── compute.ts
-│   │   └── compute.test.ts         # 16 tests
-│   ├── settle/
-│   │   ├── optimize.ts
-│   │   └── optimize.test.ts        # 6 tests
-│   ├── insights/
-│   │   ├── trip-insights.ts        # computeTripInsights (pure)
-│   │   └── all-trips-insights.ts   # computeAllTripsInsights (pure)
-│   ├── validations/
-│   │   ├── trip.ts                 # createTripSchema (includes budget)
-│   │   └── expense.ts              # addExpenseSchema
-│   ├── categories.ts               # CATEGORIES array + CATEGORY_HEX for charts
-│   ├── unsplash.ts                 # searchPhotos
-│   └── utils.ts                    # cn(), formatCurrency(), formatDate(), getMemberName()
-├── scripts/
-│   ├── seed-test.ts                # pnpm seed — creates Goa trip, 10 members, 30 expenses
-│   ├── seed-temple-tour.ts         # pnpm seed:temple — South India temple circuit, 20 members, 24 expenses
-│   ├── verify-seed.ts              # verifies seed data integrity
-│   ├── take-screenshots.js         # pnpm manual:screenshots — Puppeteer captures 16 app screenshots into public/docs/screenshots/
-│   └── generate-manual-pdf.js      # pnpm manual:pdf — renders HTML manual → docs/wayfare-user-manual.pdf (requires pnpm dev)
-├── drizzle/
-│   └── policies.sql                # all RLS policies for all 5 tables
-├── public/
-│   └── docs/
-│       ├── wayfare-user-manual.html  # 10-section user manual (served at /docs/wayfare-user-manual.html)
-│       └── screenshots/              # 16 auto-captured PNG screenshots (committed — Vercel needs them)
-├── drizzle.config.ts               # uses dotenv to load .env.local
-├── proxy.ts                        # Next.js 16 proxy (was middleware.ts in v15)
-└── CLAUDE.md
+│   ├── db/client.ts, schema/*.ts, queries/(trips, expenses, balances, insights, meta).ts
+│   ├── supabase/server.ts, client.ts, admin.ts
+│   ├── parser/parse-expense.ts          # rule-based parser
+│   ├── splits/compute.ts + compute.test.ts
+│   ├── settle/optimize.ts + optimize.test.ts
+│   ├── insights/trip-insights.ts + all-trips-insights.ts
+│   ├── validations/trip.ts + expense.ts
+│   ├── categories.ts, unsplash.ts, utils.ts
+├── scripts/ (seed-test, seed-temple-tour, verify-seed, take-screenshots, generate-manual-pdf)
+├── drizzle/policies.sql
+├── public/docs/ (wayfare-user-manual.html, screenshots/)
+├── drizzle.config.ts, proxy.ts
 ```
 
 ---
 
-## 9. Auth Flow
+## 9. Auth & Realtime
 
-1. User visits `/login` → "Continue with Google" button
-2. Supabase redirects to Google → back to `/auth/callback`
-3. Callback: `supabase.auth.exchangeCodeForSession(code)` → redirects to `/trips`
-4. `proxy.ts` refreshes the session on every request; redirects unauthenticated requests to `/login`
-5. `(app)/layout.tsx` reads session server-side via `createClient()` from `lib/supabase/server.ts`
+**Auth**: Google OAuth via Supabase. `proxy.ts` refreshes session + redirects unauthenticated → `/login`. Use `@supabase/ssr` v0.6 with `getAll()`/`setAll()` cookie pattern.
 
-Use `@supabase/ssr` v0.6+. NOT `@supabase/auth-helpers-nextjs`.
-Cookie handling: `getAll()` + `setAll()` pattern — see `lib/supabase/server.ts`.
+**Realtime**: `useTripRealtime(tripId)` subscribes to expenses, settlements, trip_members, expense_splits channels → calls `router.refresh()` on any change. Mounted via `RealtimeRefresh` in `app/(app)/trips/[id]/layout.tsx`.
 
 ---
 
-## 10. Realtime
+## 10. Coding Conventions
 
-`hooks/use-trip-realtime.ts` subscribes to four Supabase Realtime channels for a trip:
-- `expenses` filtered by `trip_id`
-- `settlements` filtered by `trip_id`
-- `trip_members` filtered by `trip_id`
-- `expense_splits` (table-wide — no direct trip_id column)
+- **TypeScript strict**. No `any`. Use `unknown` and narrow.
+- **Server actions** return `{ ok: true, data }` or `{ ok: false, error }`. Never throw to client.
+- **Money**: `numeric(12,2)` in DB, `number` in TS. Format with `formatCurrency()`.
+- **Dates**: `date` type (no time). Format with `formatDate()`. Default with `smartDefaultDate(trip.startDate, trip.endDate)` — never hardcode `new Date()`.
+- **Member names**: always `getMemberName(member)` → `displayName ?? guestName ?? "Member"`.
+- **revalidatePath**: always `revalidatePath('/trips/${tripId}', 'layout')` — layout variant invalidates whole subtree.
+- **File names**: kebab-case. No barrel files — import from actual file.
+- **Fraunces font**: `style={{ fontFamily: "var(--font-fraunces)" }}` — never Tailwind class.
+- **Dark mode**: every colour class needs a `dark:` counterpart. Go lighter, not darker (e.g. `text-slate-400 dark:text-slate-300`).
+- **Mobile-first**:
+  - List/data pages: no inner max-width (use layout's `max-w-7xl`). Form pages: `max-w-2xl`.
+  - Multi-action rows: `flex-col gap sm:flex-row sm:items-center`.
+  - Button labels: `hidden sm:inline` when space-constrained.
+  - Grids: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` — never hardcode without responsive prefix.
+  - Nav labels: `hidden md:inline`.
 
-On any change event: calls `router.refresh()` → Next.js re-renders all server components in the current route with fresh data.
-
-The `RealtimeRefresh` client component (renders nothing) is placed in `app/(app)/trips/[id]/layout.tsx` so all trip sub-pages get realtime automatically.
-
-**Important**: Tables must be added to the `supabase_realtime` publication:
-```sql
-alter publication supabase_realtime add table expenses;
-alter publication supabase_realtime add table expense_splits;
-alter publication supabase_realtime add table settlements;
-alter publication supabase_realtime add table trip_members;
-```
-
----
-
-## 11. Features Built (complete list)
-
-### Core
-- Google OAuth login (Supabase Auth)
-- Create/edit/archive trips with cover photo (Unsplash), dates, currency, budget, optional itinerary/plan
-- Invite members via shareable link + QR code
-- Add guest members (no account needed)
-- 4-mode expense splitting: equal, exact, percentage, shares
-- Expense categories with icons (8 categories)
-- Add/edit/delete/duplicate expenses
-- Expense filters: search, category pills, payer, date range, sort
-- Balance computation: min-transaction settlement algorithm
-- Settle up: suggested payments, "mark paid", settlement history
-- Settlement breakdown: "How is this calculated?" 3-step explainer
-- Member-level debt breakdown: who owes whom per person
-
-### Analytics
-- Per-trip insights: KPI cards (animated), category donut, daily spend bar, member contribution bar, 7 smart insight cards
-- All-trips portfolio: total spend, companion count, category habits, trip comparison
-- Group roles per member: Trip Banker, Tab Master, High Roller, Fair Splitter, The Balancer, Traveler
-- Payment fairness score bar per member (green → amber → red)
-- Smarter insights: cross-trip comparisons, spend trajectory, budget forecast
-- Plan vs Reality adherence card (insights page): compares written itinerary against actual expenses via Claude Haiku — coverage %, covered/missed/surprise activities; only shown when trip has an itinerary
-
-### Sharing & Export
-- Shareable public trip summary page (`/summary/[shareToken]`) — no auth required, OG image
-- AI-generated trip narrative on summary page (Claude Haiku, on-demand); uses day-by-day expense timeline + itinerary as backbone
-- Web Share API on trip cards + trip detail page (falls back to clipboard copy)
-- QR code dialogs with copy-link fallback
-- CSV export of all trip expenses (`/api/trips/[id]/export`)
-
-### AI (requires `ANTHROPIC_API_KEY`)
-- Quick-add expense parser: type or **speak** `dinner 2400 raj yesterday split 4` → pre-fills the form
-  - AI mode (Claude Haiku): understands natural language, member names, positional splits ("1st 2", "last 3"), relative dates
-  - Rule-based fallback: always works without AI key
-  - Mode badge: `✨ AI` or `⚡ Basic`
-- Voice input (Phase 18): mic button in quick-add bar; Web Speech API transcribes speech → AI parser; auto-triggers on final result; hidden on unsupported browsers; `lang: en-IN`
-- Chat import: paste a WhatsApp/group chat snippet → Claude extracts all expenses at once; preview table with inline editing; bulk-add with per-row status
-- Trip narrative generator on the summary page (day-by-day timeline + itinerary → travel story)
-- Plan vs Reality adherence analysis on the insights page
-
-**Prompt injection hardening** (all four Claude actions):
-- User-supplied data (expense text, chat transcript, itinerary, trip name/description) is wrapped in XML tags (`<expense_text>`, `<chat_transcript>`, `<trip_plan>`, `<trip_data>`) in the `user` message turn
-- Member names/IDs moved out of `system` prompt into `user` turn inside `<members>` tags
-- Post-parse member ID cross-validation: returned `paidByMemberId` and `splitMemberIds` are filtered against the actual trip member set before use
-
-### Settlement
-- UPI payment deep link (`upi://pay?...`) on the settle page — only shown on rows where the current user is the payer; inline UPI ID input → opens PhonePe/GPay/Paytm pre-filled
-- WhatsApp debt reminder — `wa.me/?text=...` link on rows where current user is payee; pre-filled message with amount and trip name
-
-### Documentation
-- **User manual** — 10-section HTML manual with 16 auto-captured screenshots served at `/docs/wayfare-user-manual.html`; PDF generated via `pnpm manual:pdf`; screenshots re-taken via `pnpm manual:screenshots` (requires `pnpm dev` running + fresh session cookies in `docs/cookies.json`)
-
-### Developer tooling
-- **`/gitpush` slash command** — `.claude/commands/gitpush.md`; runs git status → diff → add -A → smart commit → push in one step
-
-### UX
-- **Dark mode** — full dark theme via next-themes; Sun/Moon toggle in nav and login/landing pages; persists to localStorage, defaults to OS preference
-- **Help link** — BookOpen icon in desktop nav links to user manual in new tab
-- Glassmorphic design: frosted cards, gradient blobs, cyan/teal palette
-- Mobile bottom nav + desktop top nav with active states
-- Loading skeletons (Next.js `loading.tsx`) on all major pages
-- Error boundaries (`error.tsx`) at global and app level
-- Custom 404 page
-- Dynamic page titles (`generateMetadata`) on all trip sub-pages
-- Staggered card animations (`AnimatedList`)
-- Count-up animations on balance/KPI numbers (`CountUp`)
-- Modal confirmation dialogs (replaces browser `confirm()`)
-- Unsaved form warning (`useWarnBeforeLeave`)
-- Optimistic expense delete (instant UI, rollback on error)
-- Real user display names (from Google `full_name`, stored in `display_name` column)
-- Member avatars with deterministic colour initials (`MemberAvatar`)
-- `inputMode="decimal"` on all amount fields (mobile number pad)
-- Trip ordering: upcoming first, then past, then undated
-- Trip archiving (admin only)
-- Budget tracking with progress bar (green → amber → red)
+**AI prompt injection hardening** (all four Claude actions):
+- User data wrapped in XML tags in `user` turn (`<expense_text>`, `<chat_transcript>`, etc.)
+- Member names/IDs in `<members>` tags in `user` turn (not `system`)
+- Post-parse cross-validate returned member IDs against actual trip member set
 
 ---
 
-## 12. Coding Conventions
+## 11. Environment Variables
 
-- **TypeScript strict mode**. No `any`. Use `unknown` and narrow.
-- **Server actions** return `{ ok: true, data }` or `{ ok: false, error }` as const. Never throw to the client.
-- **Form validation**: react-hook-form + zodResolver. Field-level errors shown inline. Toasts only for async outcomes.
-- **Money**: store as `numeric(12,2)`. TS: `number`. Format with `formatCurrency()` from `lib/utils.ts` (uses `Intl.NumberFormat`).
-- **Dates**: store as `date` (no time) for `expense_date`. Format with `formatDate()` from `lib/utils.ts`.
-- **Member names**: always use `getMemberName(member)` from `lib/utils.ts` — handles `displayName ?? guestName ?? "Member"` fallback chain.
-- **IDs**: UUIDs generated in DB via `gen_random_uuid()`.
-- **File names**: kebab-case. `expense-card.tsx`, `use-trip-realtime.ts`.
-- **No barrel files** (`index.ts` re-exports). Import from the actual file.
-- **Comments**: explain *why*, not *what*.
-- **Fraunces font**: apply via `style={{ fontFamily: "var(--font-fraunces)" }}` — NOT a Tailwind class.
-- **Expense date defaults**: use `smartDefaultDate(trip.startDate, trip.endDate)` from `lib/utils.ts` — never hardcode `new Date().toISOString().split("T")[0]`. Logic: ongoing trip → today; trip not started or finished → start date.
-- **revalidatePath after mutations**: always use `revalidatePath('/trips/${tripId}', 'layout')` — not a page-specific path. Expenses affect settle, insights, and the dashboard; the layout variant invalidates the whole subtree at once.
-- **Dark mode classes**: every hardcoded slate/colour text and bg must have a `dark:` counterpart. See Section 6 for the convention. Never add `dark:text-slate-500` to something that was `text-slate-400` — that goes darker (wrong direction). Always go lighter: `text-slate-400 dark:text-slate-300`.
-- **Mobile-first responsive layout conventions**:
-  - List/data pages (expenses, settle, insights) have **no inner max-width** — they use the layout's `max-w-7xl`. Form pages (add/edit expense, create/edit trip) keep `max-w-2xl` for readability.
-  - Cards with multiple actions on one row use `flex-col gap sm:flex-row sm:items-center` — two-row on mobile, single row on desktop. See `expense-card.tsx` and `settle/page.tsx` for the pattern.
-  - Buttons that have text labels hide them on mobile with `hidden sm:inline` when space is tight (Export, Import chat).
-  - Grids use `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` progression — never hardcode `grid-cols-3` without a responsive prefix.
-  - Nav links: visible as icon-only on mobile (`hidden md:inline` on the label span), icon + label on desktop.
-
----
-
-## 13. Testing
-
-```bash
-pnpm test        # run Vitest
-pnpm test --run  # single run (no watch)
-pnpm typecheck   # tsc --noEmit
-```
-
-- **22 unit tests** across `lib/splits/compute.test.ts` (16) and `lib/settle/optimize.test.ts` (6)
-- All must pass before any split or settlement change
-- No component tests in v1
-
-**Seed script** (`pnpm seed`):
-- Creates "Goa Summer 2025" — 10 members, 30 expenses, all split modes, all categories
-- Verify: `pnpm exec tsx --env-file=.env.local scripts/verify-seed.ts`
-- Confirms: all splits reconcile to paisa, net balance = 0, optimizer uses n-1 transactions
-
----
-
-## 14. Environment Variables
-
-`.env.local.example` is committed. `.env.local` is gitignored.
-
-```
-NEXT_PUBLIC_SUPABASE_URL=            # Supabase project URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=       # Supabase publishable key (sb_publishable_...)
-SUPABASE_SERVICE_ROLE_KEY=           # Service role JWT — server-only
-DATABASE_URL=                        # Direct Postgres URI for Drizzle (port 5432, URL-encode special chars)
-UNSPLASH_ACCESS_KEY=                 # Unsplash API access key
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=Wayfare
-ANTHROPIC_API_KEY=                   # optional — enables AI expense parser + trip narrative
-```
-
-**ANTHROPIC_API_KEY**: Without it, the quick-add bar falls back to rule-based parsing and the narrative section shows a config error. The key must be present when the dev server **starts** — restart `pnpm dev` after adding it.
-
-**DATABASE_URL note**: URL-encode special characters in the password:
-- `#` → `%23`, `@` → `%40`, `[` → `%5B`, `]` → `%5D`
-
----
-
-## 15. Key Scripts
-
-```bash
-pnpm dev              # start dev server
-pnpm build            # production build
-pnpm typecheck        # TypeScript check
-pnpm test             # Vitest (watch)
-pnpm test --run       # Vitest (single run)
-pnpm db:push          # push Drizzle schema to Supabase
-pnpm db:studio        # Drizzle Studio (DB browser)
-pnpm seed             # seed test data (Goa trip, 10 members, 30 expenses)
-pnpm seed:temple      # seed South India temple tour (20 members, 24 expenses, current user as admin)
-pnpm manual:screenshots  # retake all 16 manual screenshots (requires pnpm dev + fresh docs/cookies.json)
-pnpm manual:pdf          # generate docs/wayfare-user-manual.pdf from public/docs/wayfare-user-manual.html
-```
-
----
-
-## 16. Build Phases (actual — all completed)
-
-| Phase | What was built | Status |
-|---|---|---|
-| 1 | Auth (Google OAuth), nav, glassmorphic design system, login page, empty trips page | ✅ Done |
-| 2 | Trips CRUD, members, invite link, Unsplash cover picker, join page | ✅ Done |
-| 3 | Expenses (4-mode split editor), categories, add/edit/delete | ✅ Done |
-| 4 | Balances, min-transaction settlement, mark paid, history, settlement breakdown | ✅ Done |
-| 5 | Deep insights: per-trip (Recharts charts + smart insights) + all-trips portfolio | ✅ Done |
-| 6 | Polish: mobile nav, active nav states, loading skeletons, error boundaries, custom 404, favicon, dynamic titles, trip editing | ✅ Done |
-| 7 | UX essentials: real user names, member avatars, decimal inputMode, modal confirms, count-up balances, trip ordering, unsaved form warning | ✅ Done |
-| 8 | Expense intelligence: search, category filter, payer filter, date range, sort, running filtered total | ✅ Done |
-| 9 | Realtime (useTripRealtime + router.refresh()), optimistic expense delete with rollback | ✅ Done |
-| 10 | Member debt breakdown, QR invite, expense duplication, budget tracking, trip archiving | ✅ Done |
-| 11 | Deploy to Vercel — live at https://wayfare-sigma.vercel.app | ✅ Done |
-| 12 | Platform admin dashboard (admin-only, guarded by PLATFORM_ADMIN_EMAIL env var) | ✅ Done |
-| 13 | Shareable trip summary card — public `/summary/[shareToken]` page + OG image | ✅ Done |
-| 14 | Group roles (Trip Banker, Tab Master, etc.) + payment fairness score on per-trip insights | ✅ Done |
-| 15 | Smarter insights — cross-trip comparisons, spend trajectory, budget forecast | ✅ Done |
-| 16 | AI quick-add expense parser — natural language → pre-filled form (Claude Haiku + rule-based fallback) | ✅ Done |
-| 17 | CSV export + AI trip narrative (Claude Haiku generates a travel story on the summary page) | ✅ Done |
-| 18 | Voice input (Web Speech API → AI parser); trip plan/itinerary field; richer narrative (day-by-day timeline); Plan vs Reality adherence card on insights page | ✅ Done |
-| 19 | User manual (10-section HTML + 16 screenshots at `/docs/wayfare-user-manual.html`); Help nav link; prompt injection hardening on all Claude actions | ✅ Done |
-| 20 | Mobile & responsive layout pass: expense cards two-row, settle page two-row, page widths widened (removed inner max-w-2xl from list/insight pages), insights grids improved, nav links visible on mobile, dark mode fixes | ✅ Done |
-
----
-
-## 17. Deployment
-
-**Production URL**: https://wayfare-sigma.vercel.app
-**Git repo**: https://github.com/Jayks/wayfare.git (branch: main)
-**Supabase**: dev project in use for production (separate prod project deferred)
-
-### Vercel env vars required
 ```
 NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_ANON_KEY        # sb_publishable_* format
 SUPABASE_SERVICE_ROLE_KEY
-DATABASE_URL          ← must use Session Pooler URL, not direct connection
+DATABASE_URL                         # Direct Postgres (URL-encode special chars in password)
 UNSPLASH_ACCESS_KEY
-NEXT_PUBLIC_APP_URL=https://wayfare-sigma.vercel.app
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=Wayfare
-ANTHROPIC_API_KEY     ← optional; AI features degrade gracefully without it
-PLATFORM_ADMIN_EMAIL  ← comma-separated admin emails for /admin dashboard
+ANTHROPIC_API_KEY                    # optional; restart pnpm dev after adding
+PLATFORM_ADMIN_EMAIL                 # comma-separated; guards /admin dashboard
 ```
 
-**DATABASE_URL on Vercel**: must use the Session Pooler endpoint — Vercel cannot reach `db.[ref].supabase.co:5432` directly without the Supabase IPv4 add-on:
+**Vercel DATABASE_URL**: must use Session Pooler (not direct connection):
 ```
 postgresql://postgres.[ref]:[password]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
 ```
 
-### Supabase setup (run once on a new project)
-1. `pnpm db:push` — push Drizzle schema
-2. Run `drizzle/policies.sql` in SQL Editor (RLS)
-3. Run the Realtime publication SQL (see section 10)
-4. Add Google OAuth callback: `https://wayfare-sigma.vercel.app/auth/callback`
+---
+
+## 12. Key Scripts
+
+```bash
+pnpm dev / build / typecheck
+pnpm test / pnpm test --run
+pnpm db:push / db:studio
+pnpm seed                     # Goa trip, 10 members, 30 expenses
+pnpm seed:temple              # South India temple tour, 20 members
+pnpm manual:screenshots       # 16 Puppeteer screenshots (needs pnpm dev + cookies.json)
+pnpm manual:pdf               # generate PDF from HTML manual
+```
 
 ---
 
-## 18. What is OUT of scope (v1)
+## 13. Deployment
 
-- Email/push notifications
-- Receipt photo uploads
-- PDF export (CSV export is done; PDF generation script exists locally but PDF is not served)
-- Multi-currency FX within a trip
-- PWA / offline mode
-- Mobile app
-- Activity/audit log
-- Comments on expenses
-- Claim guest profile (v2 — schema already supports it via user_id on trip_members)
-- TanStack Query for data fetching (installed but not wired)
+**Production**: https://wayfare-sigma.vercel.app | **Repo**: https://github.com/Jayks/wayfare.git (main)
+
+**New Supabase project setup**:
+1. `pnpm db:push`
+2. Run `drizzle/policies.sql` in SQL Editor
+3. Run Realtime publication SQL (see §5)
+4. Add Google OAuth callback URL
 
 ---
 
-## 19. Working Style
+## 14. Out of Scope (v1)
 
-- **Ask before scope creep**. New dependency, new feature area, or skipping a section — surface it first.
+Email/push notifications, receipt uploads, PDF export serving, multi-currency FX, PWA/offline, mobile app, activity log, expense comments, claim guest profile, TanStack Query data fetching.
+
+---
+
+## 15. Working Style
+
+- **Ask before scope creep** — new deps, new feature areas, skipping sections.
 - **Run `pnpm typecheck && pnpm test` before declaring done**.
-- **Prefer reading existing code**. Check `lib/utils.ts`, existing components, and existing queries before writing new ones.
-- **No silent failures**. Every error path has a toast, error boundary, or visible feedback.
-- **Keep this file updated**. When a decision changes, update CLAUDE.md immediately.
+- **Read existing code first** — check `lib/utils.ts`, components, queries before writing new ones.
+- **No silent failures** — every error path has a toast, boundary, or visible feedback.
+- **Keep this file updated** when decisions change.

@@ -12,18 +12,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { LogOut, Compass, BarChart2, MapPin, LayoutDashboard, BookOpen } from "lucide-react";
+import { LogOut, Compass, BarChart2, MapPin, LayoutDashboard, BookOpen, Sparkles } from "lucide-react";
+import { useTour } from "@/components/tour/tour-context";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 const NAV_LINKS = [
-  { href: "/trips",    label: "Trips",    icon: MapPin    },
-  { href: "/insights", label: "Insights", icon: BarChart2 },
+  { href: "/trips",    label: "Trips",    icon: MapPin,    tourId: "nav-trips"    },
+  { href: "/insights", label: "Insights", icon: BarChart2, tourId: "nav-insights" },
 ];
 
 export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { start: startTour } = useTour();
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -56,12 +58,13 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
 
         {/* Nav links — icon only on mobile, icon + label on desktop */}
         <nav className="flex items-center gap-1">
-          {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+          {NAV_LINKS.map(({ href, label, icon: Icon, tourId }) => {
             const active = pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={href}
                 href={href}
+                data-tour={tourId}
                 className={cn(
                   "flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                   active
@@ -119,6 +122,13 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
                 Admin
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem
+              onClick={startTour}
+              className="cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Take the tour
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => window.open("/docs/wayfare-user-manual.html", "_blank")}
               className="cursor-pointer"

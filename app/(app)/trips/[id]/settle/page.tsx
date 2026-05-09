@@ -96,6 +96,7 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Suggested transactions */}
+      <div data-tour="settle-suggestions">
       <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
         Suggested payments
       </h2>
@@ -154,6 +155,7 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
           ))}
         </div>
       )}
+      </div>
 
       {/* Per-member debt breakdown */}
       <MemberDebtBreakdown

@@ -3,8 +3,10 @@ import Link from "next/link";
 import { getTrips, getArchivedTrips } from "@/lib/db/queries/trips";
 import { TripCard } from "@/components/trip/trip-card";
 import { AnimatedList } from "@/components/shared/animated-list";
+import { ensureDemoTrip } from "@/app/actions/demo";
 
 export default async function TripsPage() {
+  await ensureDemoTrip();
   const [trips, archived] = await Promise.all([getTrips(), getArchivedTrips()]);
 
   return (
@@ -15,6 +17,7 @@ export default async function TripsPage() {
         </h1>
         <Link
           href="/trips/new"
+          data-tour="new-trip-btn"
           className="inline-flex items-center gap-1.5 bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl px-4 py-2 shadow-md shadow-cyan-500/25 transition-all"
         >
           <Plus className="w-4 h-4" />

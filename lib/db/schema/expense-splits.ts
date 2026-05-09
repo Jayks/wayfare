@@ -15,7 +15,7 @@ export const expenseSplits = pgTable(
   {
     id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
     expenseId: uuid("expense_id").notNull().references(() => expenses.id, { onDelete: "cascade" }),
-    memberId: uuid("member_id").notNull().references(() => tripMembers.id),
+    memberId: uuid("member_id").notNull().references(() => tripMembers.id, { onDelete: "cascade" }),
     shareAmount: numeric("share_amount", { precision: 12, scale: 2 }).notNull(),
     splitType: splitTypeEnum("split_type").notNull(),
     splitValue: numeric("split_value", { precision: 12, scale: 4 }),

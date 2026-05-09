@@ -92,7 +92,7 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6" data-tour="trip-quick-actions">
         <Link
           href={`/trips/${trip.id}/members`}
           className="glass rounded-xl p-4 flex items-center gap-3 hover:shadow-lg hover:shadow-cyan-500/10 transition-all"

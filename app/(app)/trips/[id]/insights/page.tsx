@@ -96,7 +96,7 @@ export default async function TripInsightsPage({
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6" data-tour="trip-kpis">
         <KpiCard label="Total spend" value={fmt(insights.totalSpend)}
           numericValue={insights.totalSpend} currency={currency} accent />
         <KpiCard label="Per person" value={fmt(insights.perPerson)}
