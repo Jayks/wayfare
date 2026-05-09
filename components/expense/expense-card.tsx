@@ -26,18 +26,25 @@ export function ExpenseCard({ expense, members, currentUserId, isAdmin, onDelete
       : formatDate(expense.expenseDate);
 
   return (
-    <div className="glass rounded-xl px-4 py-3 flex items-center gap-3">
-      <CategoryIcon category={expense.category} />
-
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{expense.description}</p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          {payerName} · {dateDisplay}
+    <div className="glass rounded-xl px-4 py-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+      {/* Top row: icon + description + payer */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <CategoryIcon category={expense.category} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{expense.description}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            {payerName} · {dateDisplay}
+          </p>
+        </div>
+        {/* Amount shown inline with description on desktop */}
+        <p className="hidden sm:block text-base font-semibold text-slate-800 dark:text-slate-100 tabular shrink-0" style={{ fontFamily: "var(--font-fraunces)" }}>
+          {formatCurrency(Number(expense.amount), expense.currency)}
         </p>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        <p className="text-base font-semibold text-slate-800 dark:text-slate-100 tabular" style={{ fontFamily: "var(--font-fraunces)" }}>
+      {/* Bottom row on mobile: amount on left, actions on right */}
+      <div className="flex items-center gap-2 sm:gap-2 pl-9 sm:pl-0">
+        <p className="sm:hidden text-base font-semibold text-slate-800 dark:text-slate-100 tabular mr-auto" style={{ fontFamily: "var(--font-fraunces)" }}>
           {formatCurrency(Number(expense.amount), expense.currency)}
         </p>
         {canEdit && (

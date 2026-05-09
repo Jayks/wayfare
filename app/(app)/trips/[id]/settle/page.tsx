@@ -42,7 +42,7 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
   };
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <div className="flex items-center gap-3 mb-6">
         <Link
           href={`/trips/${id}`}
@@ -60,7 +60,7 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
       <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
         Balances
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-8">
         {balances.map((b) => {
           const isPositive = b.net > 0;
           const isZero = b.net === 0;
@@ -108,8 +108,9 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
       ) : (
         <div className="space-y-2 mb-8">
           {suggestions.map((s, i) => (
-            <div key={i} className="glass rounded-xl px-4 py-3 flex items-center gap-3">
-              <div className="flex-1 flex items-center gap-2 min-w-0">
+            <div key={i} className="glass rounded-xl px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              {/* Names row */}
+              <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
                   {memberName(s.from)}
                 </span>
@@ -118,32 +119,37 @@ export default async function SettlePage({ params }: { params: Promise<{ id: str
                   {memberName(s.to)}
                 </span>
               </div>
-              <span className="text-base font-semibold text-slate-800 dark:text-slate-100 tabular shrink-0"
-                style={{ fontFamily: "var(--font-fraunces)" }}>
-                {formatCurrency(s.amount, trip.defaultCurrency)}
-              </span>
-              {currentMember?.id === s.from && (
-                <UpiPayButton
+              {/* Amount + buttons row — wraps naturally on mobile */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className="text-base font-semibold text-slate-800 dark:text-slate-100 tabular mr-auto sm:mr-0"
+                  style={{ fontFamily: "var(--font-fraunces)" }}
+                >
+                  {formatCurrency(s.amount, trip.defaultCurrency)}
+                </span>
+                {currentMember?.id === s.from && (
+                  <UpiPayButton
+                    amount={s.amount}
+                    currency={trip.defaultCurrency}
+                    toName={memberName(s.to)}
+                  />
+                )}
+                {currentMember?.id === s.to && (
+                  <WhatsAppRemindButton
+                    fromName={memberName(s.from)}
+                    amount={formatCurrency(s.amount, trip.defaultCurrency)}
+                    tripName={trip.name}
+                    settleUrl={settleUrl}
+                  />
+                )}
+                <MarkPaidButton
+                  tripId={id}
+                  fromMemberId={s.from}
+                  toMemberId={s.to}
                   amount={s.amount}
                   currency={trip.defaultCurrency}
-                  toName={memberName(s.to)}
                 />
-              )}
-              {currentMember?.id === s.to && (
-                <WhatsAppRemindButton
-                  fromName={memberName(s.from)}
-                  amount={formatCurrency(s.amount, trip.defaultCurrency)}
-                  tripName={trip.name}
-                  settleUrl={settleUrl}
-                />
-              )}
-              <MarkPaidButton
-                tripId={id}
-                fromMemberId={s.from}
-                toMemberId={s.to}
-                amount={s.amount}
-                currency={trip.defaultCurrency}
-              />
+              </div>
             </div>
           ))}
         </div>

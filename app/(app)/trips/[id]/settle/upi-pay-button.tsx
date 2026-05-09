@@ -41,14 +41,14 @@ export function UpiPayButton({ amount, currency, toName }: Props) {
   }
 
   return (
-    <div className="shrink-0 flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5 w-full sm:w-auto">
       <input
         autoFocus
         value={upiId}
         onChange={(e) => setUpiId(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter") handleOpen(); if (e.key === "Escape") setOpen(false); }}
         placeholder={`${toName.split(" ")[0].toLowerCase()}@gpay`}
-        className="w-36 px-2 py-1.5 text-xs rounded-lg border border-cyan-200 bg-white/80 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-400"
+        className="flex-1 sm:w-36 px-2 py-1.5 text-xs rounded-lg border border-cyan-200 bg-white/80 dark:bg-slate-800/80 dark:border-cyan-900 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-400"
       />
       <button
         onClick={handleOpen}

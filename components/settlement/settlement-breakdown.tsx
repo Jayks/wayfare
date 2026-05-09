@@ -142,14 +142,14 @@ export function SettlementBreakdown({
                   )}
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-1">
+                  <table className="w-full min-w-[340px] text-sm">
                     <thead>
                       <tr className="text-xs text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700">
                         <th className="text-left pb-2 font-medium">Member</th>
-                        <th className="text-right pb-2 font-medium">Paid</th>
-                        <th className="text-right pb-2 font-medium">Share owed</th>
-                        <th className="text-right pb-2 font-medium">Net</th>
+                        <th className="text-right pb-2 font-medium whitespace-nowrap">Paid</th>
+                        <th className="text-right pb-2 font-medium whitespace-nowrap">Share owed</th>
+                        <th className="text-right pb-2 font-medium whitespace-nowrap">Net</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
@@ -159,11 +159,11 @@ export function SettlementBreakdown({
                         const isZero = b.net === 0;
                         return (
                           <tr key={b.memberId}>
-                            <td className="py-2 text-slate-700 dark:text-slate-200 font-medium">{b.displayName}</td>
-                            <td className="py-2 text-right tabular text-slate-600 dark:text-slate-300">
+                            <td className="py-2 text-slate-700 dark:text-slate-200 font-medium max-w-[100px] truncate">{b.displayName}</td>
+                            <td className="py-2 text-right tabular text-slate-600 dark:text-slate-300 whitespace-nowrap">
                               {formatCurrency(b.totalPaid, currency)}
                             </td>
-                            <td className="py-2 text-right tabular text-slate-600 dark:text-slate-300">
+                            <td className="py-2 text-right tabular text-slate-600 dark:text-slate-300 whitespace-nowrap">
                               {formatCurrency(b.totalOwed, currency)}
                             </td>
                             <td className="py-2 text-right tabular">

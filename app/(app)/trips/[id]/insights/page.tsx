@@ -63,7 +63,7 @@ export default async function TripInsightsPage({
 
   if (expensesWithSplits.length === 0) {
     return (
-      <div className="max-w-5xl">
+      <div>
         <Link href={`/trips/${id}`}
           className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back
@@ -80,7 +80,7 @@ export default async function TripInsightsPage({
   }
 
   return (
-    <div className="max-w-5xl">
+    <div>
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href={`/trips/${id}`}
@@ -113,14 +113,10 @@ export default async function TripInsightsPage({
         <PaceTrackerCard data={trajectory} currency={currency} />
       )}
 
-      {/* Charts row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      {/* Charts row — 2 cols on md, 3 cols on xl */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
         <CategoryDonut data={insights.byCategory} currency={currency} />
         <DailySpendBar data={insights.byDay} currency={currency} />
-      </div>
-
-      {/* Member contributions */}
-      <div className="mb-6">
         <MemberContributions data={insights.byMember} currency={currency} />
       </div>
 
@@ -149,7 +145,7 @@ export default async function TripInsightsPage({
       <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
         Smart insights
       </h2>
-      <AnimatedList className="grid grid-cols-1 sm:grid-cols-2 gap-3" staggerMs={50}>
+      <AnimatedList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" staggerMs={50}>
         {insights.smartInsights.map((s, i) => (
           <SmartInsightCard key={i} emoji={s.emoji} title={s.title} sub={s.sub} />
         ))}

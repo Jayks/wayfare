@@ -18,7 +18,7 @@ function CustomTooltip({ active, payload }: TooltipEntry) {
   const d = payload[0].payload;
   return (
     <div className="glass rounded-xl px-3 py-2 text-xs shadow-lg">
-      <p className="font-semibold text-slate-700 mb-1">{d.name}</p>
+      <p className="font-semibold text-slate-700 dark:text-slate-200 mb-1">{d.name}</p>
       <p className="text-cyan-600 font-medium">{formatCurrency(d.totalSpend, d.currency)}</p>
       <p className="text-slate-400">{d.expenseCount} expenses · {d.memberCount} members</p>
     </div>
@@ -31,7 +31,7 @@ export function TripsSpendBar({ data }: Props) {
 
   return (
     <div className="glass rounded-2xl p-5">
-      <p className="text-sm font-semibold text-slate-700 mb-4">Spend per trip</p>
+      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Spend per trip</p>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
           <XAxis

@@ -106,13 +106,13 @@ export function CoverPhotoPicker({ value, onChange }: CoverPhotoPickerProps) {
 
           <div className="p-4 max-h-[420px] overflow-y-auto">
             {isPending ? (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {Array.from({ length: 9 }).map((_, i) => (
                   <div key={i} className="h-28 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {photos.map((photo) => (
                   <button
                     key={photo.id}

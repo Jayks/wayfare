@@ -31,7 +31,7 @@ export default async function AllInsightsPage() {
     new Intl.NumberFormat("en-IN", { style: "currency", currency: primaryCurrency, maximumFractionDigits: 0 }).format(n);
 
   return (
-    <div className="max-w-5xl">
+    <div>
       <div className="mb-6">
         <h1 className="text-3xl text-slate-800 dark:text-slate-100" style={{ fontFamily: "var(--font-fraunces)" }}>
           Your travel story
@@ -59,7 +59,7 @@ export default async function AllInsightsPage() {
         </div>
       )}
       {insights.tripCount === 1 && (
-        <div className="mb-6">
+        <div className="mb-6 max-w-sm">
           <CategoryDonut data={insights.topCategories} currency={primaryCurrency} />
         </div>
       )}
@@ -68,7 +68,7 @@ export default async function AllInsightsPage() {
       <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
         What stands out
       </h2>
-      <AnimatedList className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8" staggerMs={50}>
+      <AnimatedList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8" staggerMs={50}>
         {insights.smartInsights.map((s, i) => (
           <SmartInsightCard key={i} emoji={s.emoji} title={s.title} sub={s.sub} />
         ))}
@@ -78,7 +78,7 @@ export default async function AllInsightsPage() {
       <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
         Dive into a trip
       </h2>
-      <AnimatedList className="space-y-2" staggerMs={60}>
+      <AnimatedList className="grid grid-cols-1 lg:grid-cols-2 gap-2" staggerMs={60}>
         {insights.byTrip.map((t) => (
           <Link key={t.tripId} href={`/trips/${t.tripId}/insights`}
             className="glass rounded-xl px-4 py-3 flex items-center gap-3 hover:shadow-lg hover:shadow-cyan-500/10 transition-all group">

@@ -170,14 +170,15 @@ export function ChatImportDialog({
     <>
       <button
         onClick={() => setOpen(true)}
+        title="Import from chat"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-white/60 hover:bg-white/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl transition-colors"
       >
         <MessageSquarePlus className="w-4 h-4" />
-        Import chat
+        <span className="hidden sm:inline">Import chat</span>
       </button>
 
       <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-        <DialogContent className="glass border-white/70 dark:border-slate-700/60 max-w-2xl w-full p-0 overflow-hidden">
+        <DialogContent className="glass border-white/70 dark:border-slate-700/60 max-w-2xl w-[calc(100vw-2rem)] sm:w-full p-0 overflow-hidden">
           {/* Header */}
           <div className="px-6 py-4 border-b border-white/40 dark:border-slate-700/40">
             <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100" style={{ fontFamily: "var(--font-fraunces)" }}>

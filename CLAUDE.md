@@ -344,7 +344,8 @@ Dark mode is fully implemented via `next-themes` with `attribute="class"` on `<h
 ### Navigation
 
 - **Desktop**: Sticky top nav with logo, Trips + Insights links (active state: cyan pill), ThemeToggle, **Help link** (BookOpen → `/docs/wayfare-user-manual.html`, opens in new tab), avatar dropdown
-- **Mobile**: Fixed bottom nav (`MobileNav`) with Trips + Insights icons. Content gets `pb-24` on mobile.
+- **Mobile**: Top nav shows Trips + Insights as **icon-only** (label `hidden md:inline`). Fixed bottom `MobileNav` also shows them. Help is in the avatar dropdown. Content gets `pb-24` on mobile.
+- **Avatar dropdown** (all screen sizes): Admin (if applicable), Help, Sign out.
 
 ---
 
@@ -644,6 +645,9 @@ alter publication supabase_realtime add table trip_members;
 ### Documentation
 - **User manual** — 10-section HTML manual with 16 auto-captured screenshots served at `/docs/wayfare-user-manual.html`; PDF generated via `pnpm manual:pdf`; screenshots re-taken via `pnpm manual:screenshots` (requires `pnpm dev` running + fresh session cookies in `docs/cookies.json`)
 
+### Developer tooling
+- **`/gitpush` slash command** — `.claude/commands/gitpush.md`; runs git status → diff → add -A → smart commit → push in one step
+
 ### UX
 - **Dark mode** — full dark theme via next-themes; Sun/Moon toggle in nav and login/landing pages; persists to localStorage, defaults to OS preference
 - **Help link** — BookOpen icon in desktop nav links to user manual in new tab
@@ -683,6 +687,12 @@ alter publication supabase_realtime add table trip_members;
 - **Expense date defaults**: use `smartDefaultDate(trip.startDate, trip.endDate)` from `lib/utils.ts` — never hardcode `new Date().toISOString().split("T")[0]`. Logic: ongoing trip → today; trip not started or finished → start date.
 - **revalidatePath after mutations**: always use `revalidatePath('/trips/${tripId}', 'layout')` — not a page-specific path. Expenses affect settle, insights, and the dashboard; the layout variant invalidates the whole subtree at once.
 - **Dark mode classes**: every hardcoded slate/colour text and bg must have a `dark:` counterpart. See Section 6 for the convention. Never add `dark:text-slate-500` to something that was `text-slate-400` — that goes darker (wrong direction). Always go lighter: `text-slate-400 dark:text-slate-300`.
+- **Mobile-first responsive layout conventions**:
+  - List/data pages (expenses, settle, insights) have **no inner max-width** — they use the layout's `max-w-7xl`. Form pages (add/edit expense, create/edit trip) keep `max-w-2xl` for readability.
+  - Cards with multiple actions on one row use `flex-col gap sm:flex-row sm:items-center` — two-row on mobile, single row on desktop. See `expense-card.tsx` and `settle/page.tsx` for the pattern.
+  - Buttons that have text labels hide them on mobile with `hidden sm:inline` when space is tight (Export, Import chat).
+  - Grids use `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` progression — never hardcode `grid-cols-3` without a responsive prefix.
+  - Nav links: visible as icon-only on mobile (`hidden md:inline` on the label span), icon + label on desktop.
 
 ---
 
@@ -768,6 +778,7 @@ pnpm manual:pdf          # generate docs/wayfare-user-manual.pdf from public/doc
 | 17 | CSV export + AI trip narrative (Claude Haiku generates a travel story on the summary page) | ✅ Done |
 | 18 | Voice input (Web Speech API → AI parser); trip plan/itinerary field; richer narrative (day-by-day timeline); Plan vs Reality adherence card on insights page | ✅ Done |
 | 19 | User manual (10-section HTML + 16 screenshots at `/docs/wayfare-user-manual.html`); Help nav link; prompt injection hardening on all Claude actions | ✅ Done |
+| 20 | Mobile & responsive layout pass: expense cards two-row, settle page two-row, page widths widened (removed inner max-w-2xl from list/insight pages), insights grids improved, nav links visible on mobile, dark mode fixes | ✅ Done |
 
 ---
 

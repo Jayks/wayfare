@@ -10,7 +10,7 @@ export default async function TripsPage() {
   return (
     <div>
       <div className="flex items-center gap-4 mb-8">
-        <h1 className="text-3xl text-slate-800 dark:text-slate-100" style={{ fontFamily: "var(--font-fraunces)" }}>
+        <h1 className="text-3xl text-slate-800 dark:text-slate-100 flex-1" style={{ fontFamily: "var(--font-fraunces)" }}>
           Your trips
         </h1>
         <Link

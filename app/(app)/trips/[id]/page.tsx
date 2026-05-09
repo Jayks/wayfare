@@ -72,7 +72,7 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
           <div className="absolute bottom-4 left-5 right-5">
-            <h1 className="text-white text-3xl" style={{ fontFamily: "var(--font-fraunces)" }}>
+            <h1 className="text-white text-2xl sm:text-3xl" style={{ fontFamily: "var(--font-fraunces)" }}>
               {trip.name}
             </h1>
             {(trip.startDate || trip.endDate) && (
@@ -175,12 +175,12 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
       {/* Invite link */}
       {isAdmin && (
         <div className="glass rounded-xl p-4 mb-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-start justify-between gap-3 mb-3">
             <div>
               <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Invite to trip</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">Share with your group</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <ShareButton url={inviteUrl} tripName={trip.name} />
               <QRInvite url={inviteUrl} />
             </div>

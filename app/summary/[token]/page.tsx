@@ -147,7 +147,7 @@ export default async function SummaryPage({
         )}
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
 
         {/* Hero */}
         <div className="glass rounded-3xl overflow-hidden mb-6 shadow-xl shadow-slate-200/60 dark:shadow-black/40">
@@ -157,7 +157,7 @@ export default async function SummaryPage({
                 src={trip.coverPhotoUrl}
                 alt={trip.name}
                 fill
-                sizes="(max-width: 672px) 100vw, 672px"
+                sizes="(max-width: 896px) 100vw, 896px"
                 className="object-cover"
                 priority
               />
@@ -167,7 +167,7 @@ export default async function SummaryPage({
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
             <div className="absolute bottom-5 left-6 right-6">
               <h1
-                className="text-white text-4xl leading-tight"
+                className="text-white text-2xl sm:text-3xl lg:text-4xl leading-tight"
                 style={{ fontFamily: "var(--font-fraunces)" }}
               >
                 {trip.name}

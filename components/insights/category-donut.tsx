@@ -54,7 +54,7 @@ export function CategoryDonut({ data, currency }: Props) {
       </ResponsiveContainer>
 
       {/* Custom legend — always fully visible */}
-      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5">
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
         {data.map((entry) => (
           <div key={entry.category} className="flex items-center gap-1.5 min-w-0">
             <span

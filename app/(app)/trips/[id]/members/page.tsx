@@ -90,12 +90,12 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
       {/* Invite link */}
       {isAdmin && (
         <div className="glass rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-start justify-between gap-3 mb-3">
             <div>
               <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Invite to trip</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Anyone with this link can join.</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <ShareButton url={inviteUrl} tripName={trip.name} />
               <QRInvite url={inviteUrl} />
             </div>

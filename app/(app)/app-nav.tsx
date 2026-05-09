@@ -54,8 +54,8 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
           </span>
         </Link>
 
-        {/* Desktop nav links — hidden on mobile (handled by MobileNav) */}
-        <nav className="hidden md:flex items-center gap-1">
+        {/* Nav links — icon only on mobile, icon + label on desktop */}
+        <nav className="flex items-center gap-1">
           {NAV_LINKS.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + "/");
             return (
@@ -63,14 +63,14 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                   active
                     ? "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/50 dark:text-cyan-400"
                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800"
                 )}
               >
                 <Icon className="w-4 h-4" />
-                {label}
+                <span className="hidden md:inline">{label}</span>
               </Link>
             );
           })}
@@ -119,6 +119,14 @@ export default function AppNav({ user, isAdmin }: { user: User; isAdmin: boolean
                 Admin
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem
+              onClick={() => window.open("/docs/wayfare-user-manual.html", "_blank")}
+              className="cursor-pointer"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Help
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-700" />
             <DropdownMenuItem
               onClick={handleSignOut}
               className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer"

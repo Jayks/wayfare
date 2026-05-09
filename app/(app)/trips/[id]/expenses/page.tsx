@@ -28,9 +28,9 @@ export default async function ExpensesPage({ params }: { params: Promise<{ id: s
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   return (
-    <div className="max-w-2xl">
+    <div>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
         <Link
           href={`/trips/${id}`}
           className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium transition-colors"
@@ -41,31 +41,35 @@ export default async function ExpensesPage({ params }: { params: Promise<{ id: s
         <h1 className="text-2xl text-slate-800 dark:text-slate-100 flex-1" style={{ fontFamily: "var(--font-fraunces)" }}>
           Expenses
         </h1>
-        <ChatImportDialog
-          tripId={id}
-          members={members}
-          currency={trip.defaultCurrency}
-          defaultMemberId={currentMember?.id ?? members[0]?.id ?? ""}
-          tripStartDate={trip.startDate ?? null}
-          tripEndDate={trip.endDate ?? null}
-        />
-        {expenses.length > 0 && (
-          <a
-            href={`/api/trips/${id}/export`}
-            download
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-white/60 hover:bg-white/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl transition-colors"
+        {/* Action buttons — always on same line as title, icon-only on mobile */}
+        <div className="flex items-center gap-2 shrink-0">
+          <ChatImportDialog
+            tripId={id}
+            members={members}
+            currency={trip.defaultCurrency}
+            defaultMemberId={currentMember?.id ?? members[0]?.id ?? ""}
+            tripStartDate={trip.startDate ?? null}
+            tripEndDate={trip.endDate ?? null}
+          />
+          {expenses.length > 0 && (
+            <a
+              href={`/api/trips/${id}/export`}
+              download
+              title="Export CSV"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-white/60 hover:bg-white/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Export</span>
+            </a>
+          )}
+          <Link
+            href={`/trips/${id}/expenses/new`}
+            className="inline-flex items-center gap-1.5 bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl px-4 py-2 shadow-md shadow-cyan-500/25 transition-all"
           >
-            <Download className="w-4 h-4" />
-            Export
-          </a>
-        )}
-        <Link
-          href={`/trips/${id}/expenses/new`}
-          className="inline-flex items-center gap-1.5 bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl px-4 py-2 shadow-md shadow-cyan-500/25 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          Add
-        </Link>
+            <Plus className="w-4 h-4" />
+            Add
+          </Link>
+        </div>
       </div>
 
       {expenses.length === 0 ? (

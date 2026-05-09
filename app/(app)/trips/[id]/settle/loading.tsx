@@ -2,13 +2,13 @@ import { Skeleton } from "@/components/shared/skeleton";
 
 export default function SettleLoading() {
   return (
-    <div className="max-w-2xl">
+    <div>
       <div className="flex items-center gap-3 mb-6">
         <Skeleton className="h-4 w-16" />
         <Skeleton className="h-7 w-24" />
       </div>
       <Skeleton className="h-4 w-20 mb-3" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-8">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="glass rounded-xl px-4 py-3 flex items-center gap-3">
             <Skeleton className="w-8 h-8 rounded-full shrink-0" />
