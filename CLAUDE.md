@@ -134,6 +134,7 @@ start_date, end_date: date
 budget: numeric(12,2)
 itinerary: text           -- used by AI narrative + adherence
 is_archived: boolean default false
+is_demo: boolean default false  -- seeded sample trip; pinned first in list
 created_by: uuid          -- auth.users.id
 share_token: uuid unique default gen_random_uuid()
 created_at: timestamptz
@@ -160,7 +161,7 @@ created_by_user_id: uuid, created_at, updated_at
 
 ### expense_splits
 ```
-id, expense_id fk->expenses(cascade), member_id fk->trip_members
+id, expense_id fk->expenses(cascade), member_id fk->trip_members(cascade)
 share_amount: numeric(12,2)   -- computed
 split_type: enum('equal','exact','percentage','shares')
 split_value: numeric(12,4)    -- raw input (null for equal)
@@ -296,18 +297,22 @@ wayfare/
 │   └── actions/
 │       ├── trips.ts, expenses.ts, members.ts, settlements.ts, unsplash.ts
 │       ├── parse-expense.ts, narrative.ts, trip-adherence.ts, parse-chat.ts
+│       └── demo.ts                          # ensureDemoTrip — seeds/deduplicates sample trip
 ├── components/
 │   ├── ui/                              # shadcn/base-ui primitives
 │   ├── expense/  (expense-card, expense-filters, split-editor, quick-add-bar, chat-import-dialog, ...)
 │   ├── trip/     (trip-card, cover-photo-picker, budget-bar, qr-invite, narrative-section, adherence-card, ...)
 │   ├── settlement/ (settlement-breakdown, member-debt-breakdown)
 │   ├── insights/ (kpi-card, category-donut, daily-spend-bar, member-contributions, trips-spend-bar, ...)
+│   ├── tour/     (tour-context.tsx, tour-layer.tsx)
 │   └── shared/   (skeleton, animated-list, count-up, confirm-dialog, member-avatar, mobile-nav, realtime-refresh, theme-toggle)
 ├── hooks/
 │   ├── use-trip-realtime.ts, use-warn-before-leave.ts, use-speech-recognition.ts
 ├── lib/
 │   ├── db/client.ts, schema/*.ts, queries/(trips, expenses, balances, insights, meta).ts
 │   ├── supabase/server.ts, client.ts, admin.ts
+│   ├── demo/seed-demo-trip.ts           # seeds Goa sample trip (8 expenses, all split modes)
+│   ├── tour/types.ts + steps.ts         # TourStep type; getTourSteps(demoTripId) — 8-step sequence
 │   ├── parser/parse-expense.ts          # rule-based parser
 │   ├── splits/compute.ts + compute.test.ts
 │   ├── settle/optimize.ts + optimize.test.ts
@@ -402,13 +407,53 @@ pnpm manual:pdf               # generate PDF from HTML manual
 
 ---
 
-## 14. Out of Scope (v1)
+## 14. Onboarding Tour (Phase 21)
+
+### Demo trip seeding
+`ensureDemoTrip()` (`app/actions/demo.ts`) — called from the trips page on every load:
+- Checks if user already has a demo trip (`is_demo = true`). If yes (even one), returns early.
+- If more than one exists (race condition), deletes extras keeping the oldest.
+- If none exists, seeds "Goa 2025 · Sample" via `lib/demo/seed-demo-trip.ts` — 5 members, 8 expenses covering all 4 split modes.
+- **Do NOT call `revalidatePath` inside `ensureDemoTrip`** — it is called during render from a server component, and Next.js 16 forbids `revalidatePath` during render.
+- Demo trip is pinned first in the trips list (`ORDER BY is_demo DESC`), has an amber "Sample Trip" badge and ring on the card.
+
+### Tour engine
+`TourProvider` (`components/tour/tour-context.tsx`) wraps `(app)/layout.tsx`:
+- Auto-launches on first visit via `localStorage` key `wayfare_tour_done`.
+- Replayable from avatar dropdown → "Take the tour".
+- On finish (Done button): navigates to `/trips` + shows a sonner toast with "New trip" CTA.
+- On skip (X button): closes silently, no navigation.
+- Reads the demo trip ID from the `[data-tour='demo-trip']` card's Link href at step 3 — no server call needed.
+- Prefetches the next step's page with `router.prefetch()` while the user reads the current step.
+- **Do NOT call `router.push` inside a `setStep` updater callback** — it triggers a React render-time setState error. Always check outside the updater.
+
+`TourLayer` (`components/tour/tour-layer.tsx`):
+- Rendered via `createPortal` to `document.body` to avoid stacking context issues.
+- Backdrop: **4-quadrant divs** (top/bottom/left/right of spotlight) with `backdrop-filter: blur(6px)` + dark tint. The spotlight area itself is left fully sharp and unblurred.
+- Resets `rect` to null immediately on step change — prevents old spotlight bleeding onto new page during navigation.
+- Shows full-screen blur + spinner while the target element is loading on the new page.
+- Spotlight ring uses `box-shadow` for the cyan outline + glow.
+
+### Tour step sequence (8 steps)
+`getTourSteps(demoTripId)` in `lib/tour/steps.ts` — steps 4–7 are only appended once `demoTripId` is known:
+1. Welcome modal (null target)
+2. New trip button (`[data-tour='new-trip-btn']`, /trips)
+3. Sample trip card (`[data-tour='demo-trip']`, /trips) ← demoTripId read here
+4. Trip quick-actions grid (`[data-tour='trip-quick-actions']`, /trips/[id])
+5. Expense add button (`[data-tour='expense-add-btn']`, /trips/[id]/expenses)
+6. Suggested payments (`[data-tour='settle-suggestions']`, /trips/[id]/settle)
+7. Trip KPI cards (`[data-tour='trip-kpis']`, /trips/[id]/insights)
+8. All-trips Insights nav (`[data-tour='nav-insights']`, /trips)
+
+---
+
+## 16. Out of Scope (v1)
 
 Email/push notifications, receipt uploads, PDF export serving, multi-currency FX, PWA/offline, mobile app, activity log, expense comments, claim guest profile, TanStack Query data fetching.
 
 ---
 
-## 15. Working Style
+## 17. Working Style
 
 - **Ask before scope creep** — new deps, new feature areas, skipping sections.
 - **Run `pnpm typecheck && pnpm test` before declaring done**.
