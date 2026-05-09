@@ -75,22 +75,35 @@ export function TourLayer({ step, stepIndex, totalSteps, onNext, onPrev, onSkip 
 
   const vpH = window.innerHeight;
   const vpW = window.innerWidth;
+  const isMobile = vpW < 640;
   const isLoading = !!step.target && !rect;
   const isReady   = !step.target || !!rect;
-  const popoverW  = Math.min(360, vpW - 24);
 
   // Popover position
   let popoverStyle: React.CSSProperties;
-  if (!step.target || !rect) {
+  if (isMobile) {
+    // On mobile: always anchor to bottom above the mobile nav bar (~64px)
+    popoverStyle = {
+      position: "fixed",
+      bottom: 72,
+      left: 12,
+      right: 12,
+      zIndex: 1003,
+    };
+  } else if (!step.target || !rect) {
+    const popoverW = Math.min(360, vpW - 24);
     popoverStyle = {
       position: "fixed", top: "50%", left: "50%",
       transform: "translate(-50%, -50%)", zIndex: 1003, width: popoverW,
     };
   } else {
+    const popoverW = Math.min(360, vpW - 24);
+    const POPOVER_H = 210;
     const spotBottom = rect.top + rect.height + PAD;
     const belowSpace = vpH - spotBottom - 16;
-    const useBelow   = belowSpace >= 200 || belowSpace >= rect.top - PAD;
-    const top  = useBelow ? spotBottom + 12 : rect.top - PAD - 200 - 12;
+    const useBelow   = belowSpace >= POPOVER_H || belowSpace >= rect.top - PAD;
+    const rawTop = useBelow ? spotBottom + 12 : rect.top - PAD - POPOVER_H - 12;
+    const top  = Math.max(8, Math.min(rawTop, vpH - POPOVER_H - 8));
     const left = Math.max(12, Math.min(rect.left - PAD, vpW - popoverW - 12));
     popoverStyle = { position: "fixed", top, left, zIndex: 1003, width: popoverW };
   }
@@ -191,7 +204,7 @@ export function TourLayer({ step, stepIndex, totalSteps, onNext, onPrev, onSkip 
             className="glass rounded-2xl shadow-2xl shadow-cyan-500/10"
             style={{ ...popoverStyle, pointerEvents: "all" }}
           >
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <h3
                   className="text-slate-800 dark:text-slate-100 font-semibold text-base leading-snug"
@@ -212,8 +225,8 @@ export function TourLayer({ step, stepIndex, totalSteps, onNext, onPrev, onSkip 
                 {step.description}
               </p>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {Array.from({ length: totalSteps }).map((_, i) => (
                     <div
                       key={i}
@@ -227,11 +240,11 @@ export function TourLayer({ step, stepIndex, totalSteps, onNext, onPrev, onSkip 
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0 ml-auto">
                   {stepIndex > 0 && (
                     <button
                       onClick={onPrev}
-                      className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                      className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-2 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors min-h-[36px]"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
                       Back
@@ -239,7 +252,7 @@ export function TourLayer({ step, stepIndex, totalSteps, onNext, onPrev, onSkip 
                   )}
                   <button
                     onClick={onNext}
-                    className="flex items-center gap-1 bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-all shadow-sm shadow-cyan-500/25"
+                    className="flex items-center gap-1 bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-xs font-medium px-4 py-2 rounded-lg transition-all shadow-sm shadow-cyan-500/25 min-h-[36px]"
                   >
                     {stepIndex === totalSteps - 1 ? "Done" : (
                       <>Next <ChevronRight className="w-3.5 h-3.5" /></>
